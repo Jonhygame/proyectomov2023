@@ -2,6 +2,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:proyectomov2023/screens/login_screen.dart';
+import 'package:proyectomov2023/screens/settings_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -28,7 +29,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
-                          LoginScreen(),
+                          SettingsScreen(),
                       settings: RouteSettings(name: '/principal'),
                       transitionsBuilder:
                           (context, animation, secondaryAnimation, child) {

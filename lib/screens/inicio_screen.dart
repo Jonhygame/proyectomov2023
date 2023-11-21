@@ -1,17 +1,13 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:day_night_switcher/day_night_switcher.dart';
 import 'package:flutter/material.dart';
-import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/screens/dashboard_screen.dart';
-import 'package:proyectomov2023/screens/inicio_screen.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+class InicioScreen extends StatelessWidget {
+  const InicioScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-        child: Scaffold(
+    return Scaffold(
       bottomNavigationBar: CurvedNavigationBar(
           height: 55,
           color: Colors.blueGrey.shade100,
@@ -81,23 +77,7 @@ class SettingsScreen extends StatelessWidget {
               color: Colors.blueGrey,
             ),
           ]),
-      body: Center(
-        child: Column(
-          children: [
-            const Text('Settings'),
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20),
-              child: DayNightSwitcher(
-                isDarkModeEnabled: GlobalValues.flagTheme.value,
-                onStateChanged: (isDarkModeEnabled) {
-                  GlobalValues.teme.setBool('teme', isDarkModeEnabled);
-                  GlobalValues.flagTheme.value = isDarkModeEnabled;
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    ));
+      body: Text('Hola'),
+    );
   }
 }
