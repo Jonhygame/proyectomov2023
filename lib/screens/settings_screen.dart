@@ -16,7 +16,7 @@ class SettingsScreen extends StatelessWidget {
           height: 55,
           color: Colors.blueGrey.shade100,
           animationDuration: Duration(milliseconds: 600),
-          index: 1,
+          index: 2,
           onTap: (index) {
             switch (index) {
               case 0:
@@ -27,41 +27,35 @@ class SettingsScreen extends StatelessWidget {
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
                           InicioScreen(),
-                      settings: RouteSettings(name: '/principal'),
+                      settings: RouteSettings(name: '/inicio'),
                       transitionsBuilder:
                           (context, animation, secondaryAnimation, child) {
                         return child;
-                      },
-                      transitionDuration: Duration(
-                          milliseconds:
-                              0), // Establecer la duración a 0 para desactivar la transición
+                      }, // Establecer la duración a 0 para desactivar la transición
                     ),
                   );
                 });
                 break;
               case 1:
                 print('caso 1 ');
-                //pantalla actual
-                break;
-              case 2:
-                print('caso 2 ');
                 Future.delayed(Duration(milliseconds: 600), () {
                   Navigator.push(
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
                           DashboardScreen(),
-                      settings: RouteSettings(name: '/lista'),
+                      settings: RouteSettings(name: '/dashboard'),
                       transitionsBuilder:
                           (context, animation, secondaryAnimation, child) {
                         return child;
                       },
-                      transitionDuration: Duration(
-                          milliseconds:
-                              0), // Establecer la duración a 0 para desactivar la transición
                     ),
                   );
                 });
+                break;
+              case 2:
+                print('caso 2 ');
+                //pantalla actual
                 break;
               default:
                 print('nada');
