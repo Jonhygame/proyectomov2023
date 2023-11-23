@@ -73,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
             alignment: Alignment.bottomCenter,
             children: [
               Container(
-                height: 370,
+                height: 398,
                 margin: const EdgeInsets.symmetric(horizontal: 30),
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(

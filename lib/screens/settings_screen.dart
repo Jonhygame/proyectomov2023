@@ -16,6 +16,7 @@ class SettingsScreen extends StatelessWidget {
           height: 55,
           color: Colors.blueGrey.shade100,
           animationDuration: Duration(milliseconds: 600),
+          backgroundColor: Colors.blueGrey,
           index: 2,
           onTap: (index) {
             switch (index) {

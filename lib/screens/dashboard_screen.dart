@@ -19,6 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           height: 55,
           color: Colors.blueGrey.shade100,
           animationDuration: Duration(milliseconds: 600),
+          backgroundColor: Colors.blueGrey,
           index: 1,
           onTap: (index) {
             switch (index) {
