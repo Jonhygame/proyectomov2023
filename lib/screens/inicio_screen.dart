@@ -5,6 +5,7 @@ import 'package:proyectomov2023/database/database.dart';
 import 'package:proyectomov2023/models/laboratorios_model.dart';
 import 'package:proyectomov2023/screens/dashboard_screen.dart';
 import 'package:proyectomov2023/screens/settings_screen.dart';
+import 'package:proyectomov2023/widgets/CardLaboratiorioWidget.dart';
 
 class InicioScreen extends StatefulWidget {
   const InicioScreen({super.key});
@@ -142,7 +143,9 @@ class _InicioScreenState extends State<InicioScreen> {
                   return ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return CardLaboratorioWidget()
+                      return CardLaboratorioWidget(
+                        numeroComputadoras: 3,
+                      );
                     },
                   );
                 } else {
