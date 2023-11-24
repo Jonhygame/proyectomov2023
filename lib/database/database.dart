@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import 'package:proyectomov2023/models/equipo_model.dart';
 import 'package:proyectomov2023/models/laboratorios_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -141,6 +142,13 @@ class Data {
     var conexion = await database;
     var result = await conexion!.query('tblTareas');
     return result.map((task) => LaboratorioModel.fromMap(task)).toList();
+  }
+
+  Future<List<EquipoModel>> SELECTEQUIPOS(id) async {
+    var conexion = await database;
+    var result = await conexion!
+        .query('Equipo', where: 'ID_Laboratorio = ?', whereArgs: [id]);
+    return result.map((map) => EquipoModel.fromMap(map)).toList();
   }
 
   //SELECT * FROM tblCarrera
