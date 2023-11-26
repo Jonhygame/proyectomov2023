@@ -33,6 +33,11 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          title: Text('Inicio de sesión'),
+          backgroundColor: Color.fromARGB(255, 31, 166, 187),
+          // Agrega más configuraciones de AppBar según tus necesidades
+        ),
         body: Stack(
           children: [
             // Fondo con la imagen
@@ -112,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
             const SizedBox(height: 10),
-            _buildFloatingActionButton(Icons.login, 'Send', () {
+            _buildFloatingActionButton(Icons.login, 'Iniciar Sesión', () {
               var email = txtConUser.text;
               var pass = txtConPass.text;
             }),
@@ -157,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SignInButton(
               Buttons.gitHub,
-              text: 'GitHub Connection',
+              text: 'Inicia Sesión con GitHub',
               onPressed: () async {
                 _gitHubSignIn(context);
               },
