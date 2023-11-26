@@ -20,7 +20,7 @@ dependencies:
   path_provider: ^2.1.1
   sqflite: ^2.3.0
   shared_preferences: ^2.2.1
-  http: ^1.1.0
+  http: ^0.13.5
   table_calendar: ^3.0.9
   youtube_player_flutter: ^8.1.2
   flutter_rating_stars: ^1.0.3+4
@@ -28,9 +28,10 @@ dependencies:
   cloud_firestore: ^4.12.2
   firebase_storage: ^11.4.1
   google_maps_flutter: ^2.5.0
-  google_fonts: ^6.1.0
+  google_fonts: ^4.0.4
   google_sign_in: ^6.1.6
-  sign_in_button: ^3.0.0  
+  sign_in_button: ^3.0.0
+  github_sign_in_plus: ^0.0.1  
 
 dev_dependencies:
   flutter_test:
