@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final EmailAuth emailAuth = EmailAuth();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  TextEditingController emailResetController = TextEditingController();
 
   @override
   void initState() {
@@ -97,8 +98,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {
-                    // Agrega la lógica para redirigir a la pantalla correspondiente
+                  onTap: () async {
+                    _showResetPasswordDialog(context);
                   },
                   child: Text(
                     '¿Olvidaste tu contraseña?',
@@ -124,6 +125,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 UserCredential? userCredential = await signInWithGoogle();
 
                 if (userCredential != null) {
+                  // ignore: use_build_context_synchronously
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -135,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: Text(
+                            child: const Text(
                               'OK',
                               style: TextStyle(
                                 color: Colors.black, // Cambia el color a negro
@@ -251,6 +253,109 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _showResetPasswordDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Restablecer contraseña'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Ingresa tu dirección de correo electrónico para restablecer la contraseña:',
+              ),
+              const SizedBox(height: 10),
+              _buildTextField(
+                emailResetController,
+                'Correo',
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Cerrar el cuadro de diálogo
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                // Lógica para enviar el correo de restablecimiento de contraseña
+                _sendPasswordResetEmail(emailResetController.text);
+                // Cerrar el cuadro de diálogo
+                Navigator.pop(context);
+              },
+              child: const Text(
+                'Enviar',
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Función para enviar el correo de restablecimiento de contraseña
+  void _sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      // Muestra un mensaje al usuario informando que se envió el correo
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Restablecimiento de contraseña'),
+            content: Text(
+              'Se ha enviado un correo electrónico para restablecer tu contraseña. Por favor, verifica tu bandeja de entrada.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'OK',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      print('Error al enviar el correo de restablecimiento de contraseña: $e');
+      // Muestra un mensaje de error al usuario
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text(
+              'Ocurrió un error al intentar restablecer la contraseña. Por favor, inténtalo de nuevo.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'OK',
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
   Widget _buildTextField(TextEditingController controller, String label) {
     return TextField(
       decoration: InputDecoration(
@@ -298,7 +403,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: Text('OK'),
+                    child: Text(
+                      'OK',
+                      style: TextStyle(
+                        color: Colors.black, // Cambia el color a negro
+                      ),
+                    ),
                   ),
                 ],
               );
