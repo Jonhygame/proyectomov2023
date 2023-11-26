@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:github_sign_in_plus/github_sign_in_plus.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/firebase/email_auth.dart';
@@ -16,6 +18,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController txtConUser = TextEditingController();
   final TextEditingController txtConPass = TextEditingController();
   final EmailAuth emailAuth = EmailAuth();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   void initState() {
@@ -26,96 +30,224 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // Fondo con la imagen
-          Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/Images/Fondo.jpg'),
-                fit: BoxFit.cover,
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            // Fondo con la imagen
+            Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/Fondo.jpg'),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          // Contenido de la pantalla
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 100.0),
-              child: _buildLoginContainer(),
+            // Contenido de la pantalla
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 100.0),
+                child: _buildLoginContainer(),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
   Widget _buildLoginContainer() {
-    return Container(
-      height: 600,
-      margin: const EdgeInsets.symmetric(horizontal: 30),
-      padding: const EdgeInsets.all(30),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: Color.fromARGB(255, 151, 26, 26),
-      ),
-      child: Column(
-        children: [
-          _buildTextField(txtConUser, 'Correo'),
-          const SizedBox(height: 10),
-          _buildTextField(txtConPass, 'Password'),
-          const SizedBox(height: 10),
-          _buildFloatingActionButton(Icons.bookmark_add, 'Register :)', () {
-            Navigator.pushNamed(context, '/register');
-          }),
-          const SizedBox(height: 10),
-          _buildFloatingActionButton(Icons.login, 'Send', () {
-            var email = txtConUser.text;
-            var pass = txtConPass.text;
-            emailAuth.login(emailLogin: email, pwdLogin: pass);
-            //Navigator.pushNamed(context, '/dash');
-          }),
-          _buildSessionCheckbox(),
-          const Text("Guardar session"),
-          SignInButton(
-            Buttons.google,
-            text: "Inicia Sesión con Google",
-            onPressed: () async {
-              UserCredential? userCredential = await signInWithGoogle();
+    return SingleChildScrollView(
+      child: Container(
+        height: 600,
+        margin: const EdgeInsets.symmetric(horizontal: 30),
+        padding: const EdgeInsets.all(30),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Color.fromARGB(255, 31, 166, 187),
+        ),
+        child: Column(
+          children: [
+            // Mover el logo aquí para que aparezca encima de los TextField
+            Image.asset(
+              'assets/images/logoUsuario.png',
+              width: 100,
+              height: 100,
+            ),
+            const SizedBox(height: 20), // Ajusta según tu preferencia
+            _buildTextField(txtConUser, 'Correo'),
+            const SizedBox(height: 10),
+            _buildTextField(txtConPass, 'Password'),
+            const SizedBox(height: 10),
+            // Row para colocar los textos "Registrate aquí" y "¿Olvidaste tu contraseña?"
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/register');
+                  },
+                  child: Text(
+                    'Registrate aquí',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    // Agrega la lógica para redirigir a la pantalla correspondiente
+                  },
+                  child: Text(
+                    '¿Olvidaste tu contraseña?',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _buildFloatingActionButton(Icons.login, 'Send', () {
+              var email = txtConUser.text;
+              var pass = txtConPass.text;
+            }),
+            _buildSessionCheckbox(),
+            const Text("Guardar session"),
+            SignInButton(
+              Buttons.google,
+              text: "Inicia Sesión con Google",
+              onPressed: () async {
+                UserCredential? userCredential = await signInWithGoogle();
 
-              if (userCredential != null) {
-                // El usuario ha iniciado sesión exitosamente
-                print(
-                    "Usuario autenticado: ${userCredential.user?.displayName}");
-              } else {
-                // Ocurrió un error durante la autenticación
-                print("Error de autenticación con Google");
-              }
-            },
-          ),
-        ],
+                if (userCredential != null) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Un error ha ocurrido'),
+                        content: Text('Error de autenticación con Google'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              'OK',
+                              style: TextStyle(
+                                color: Colors.black, // Cambia el color a negro
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                  Navigator.pushNamed(context, '/inicio');
+                  // Credenciales incorrectas, mostrar un showDialog
+                  // ignore: use_build_context_synchronously
+                }
+              },
+            ),
+            SignInButton(
+              Buttons.gitHub,
+              text: 'GitHub Connection',
+              onPressed: () async {
+                _gitHubSignIn(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount!.authentication;
 
-      if (googleUser == null) return null;
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
       );
 
-      return await FirebaseAuth.instance.signInWithCredential(credential);
-    } catch (e) {
-      print(e.toString());
+      return await _auth.signInWithCredential(credential);
+    } catch (error) {
+      print("Error durante la autenticación con Google: $error");
       return null;
+    }
+  }
+
+  final GitHubSignIn gitHubSignIn = GitHubSignIn(
+    clientId: '42b7e29d1de8fc9d1278',
+    clientSecret: '7139ca8a8a3235ddf725da8d14f294ecb61c8d80',
+    redirectUrl: 'https://proyectopmsn2023.firebaseapp.com/__/auth/handler',
+    title: 'GitHub Connection',
+    centerTitle: false,
+  );
+
+  void _gitHubSignIn(BuildContext context) async {
+    var result = await gitHubSignIn.signIn(context);
+    switch (result.status) {
+      case GitHubSignInResultStatus.ok:
+        Navigator.pushNamed(context, '/inicio');
+        break;
+
+      case GitHubSignInResultStatus.cancelled:
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Un error ha ocurrido'),
+              content: Text('Error de autenticación con GitHub'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'OK',
+                    style: TextStyle(
+                      color: Colors.black, // Cambia el color a negro
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+        break;
+      case GitHubSignInResultStatus.failed:
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Un error ha ocurrido'),
+              content: Text('Error de autenticación con GitHub'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'OK',
+                    style: TextStyle(
+                      color: Colors.black, // Cambia el color a negro
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+        break;
     }
   }
 
@@ -124,6 +256,11 @@ class _LoginScreenState extends State<LoginScreen> {
       decoration: InputDecoration(
         border: OutlineInputBorder(),
         labelText: label,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(vertical: 15),
+        alignLabelWithHint:
+            true, // Alinea el texto del placeholder con el texto ingresado
       ),
       controller: controller,
     );
@@ -134,7 +271,41 @@ class _LoginScreenState extends State<LoginScreen> {
     return FloatingActionButton.extended(
       icon: Icon(icon),
       label: Text(label),
-      onPressed: onPressed,
+      onPressed: () async {
+        var email = txtConUser.text;
+        var pass = txtConPass.text;
+
+        UserCredential? userCredential =
+            await emailAuth.signInWithEmailAndPassword(
+          email: email,
+          password: pass,
+        );
+
+        if (userCredential != null) {
+          // Autenticación exitosa, redirigir a la pantalla de inicio
+          Navigator.pushNamed(context, '/inicio');
+        } else {
+          // Credenciales incorrectas, mostrar un showDialog
+          // ignore: use_build_context_synchronously
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Credenciales incorrectas'),
+                content: Text('Por favor, verifica tu correo y contraseña.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('OK'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      },
     );
   }
 

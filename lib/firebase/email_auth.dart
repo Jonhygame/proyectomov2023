@@ -14,15 +14,18 @@ class EmailAuth {
     }
   }
 
-  Future<bool> login(
-      {required String emailLogin, required String pwdLogin}) async {
+  Future<UserCredential?> signInWithEmailAndPassword(
+      {required String email, required String password}) async {
     try {
-      final credentials = await auth.signInWithEmailAndPassword(
-          email: emailLogin, password: pwdLogin);
-      print(credentials.user!.emailVerified.toString());
-      return true;
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      return userCredential;
     } catch (e) {
-      return false;
+      print("Error de autenticación con correo y contraseña: $e");
+      return null;
     }
   }
 }
