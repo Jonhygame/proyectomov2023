@@ -121,8 +121,16 @@ class _LoginScreenState extends State<LoginScreen> {
               var email = txtConUser.text;
               var pass = txtConPass.text;
             }),
-            _buildSessionCheckbox(),
-            const Text("Guardar session"),
+            Checkbox(
+              value: GlobalValues.session.getBool('check') ?? false,
+              activeColor: Colors.orange,
+              onChanged: (bool? newBool) {
+                setState(() {
+                  GlobalValues.session.setBool('check', newBool ?? false);
+                });
+              },
+            ),
+            const Text("Guardar Sesión"),
             SignInButton(
               Buttons.google,
               text: "Inicia Sesión con Google",
@@ -154,6 +162,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     },
                   );
                 } else {
+                  // Verifica si el Checkbox está marcado
+                  bool isCheckboxChecked =
+                      GlobalValues.session.getBool('check') ?? false;
+
+                  // Si el Checkbox está marcado, actualiza la sesión
+                  if (isCheckboxChecked) {
+                    setState(() {
+                      GlobalValues.session.setBool('session', true);
+                    });
+                  }
+
                   Navigator.pushNamed(context, '/inicio');
                   // Credenciales incorrectas, mostrar un showDialog
                   // ignore: use_build_context_synchronously
@@ -165,6 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
               text: 'Inicia Sesión con GitHub',
               onPressed: () async {
                 _gitHubSignIn(context);
+                if (isCheckboxChecked()) {}
               },
             ),
           ],
@@ -204,6 +224,15 @@ class _LoginScreenState extends State<LoginScreen> {
     var result = await gitHubSignIn.signIn(context);
     switch (result.status) {
       case GitHubSignInResultStatus.ok:
+        // Verifica si el Checkbox está marcado
+        bool isCheckboxChecked = GlobalValues.session.getBool('check') ?? false;
+
+        // Si el Checkbox está marcado, actualiza la sesión
+        if (isCheckboxChecked) {
+          setState(() {
+            GlobalValues.session.setBool('session', true);
+          });
+        }
         Navigator.pushNamed(context, '/inicio');
         break;
 
@@ -376,6 +405,10 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  bool isCheckboxChecked() {
+    return GlobalValues.session.getBool('session') ?? false;
+  }
+
   Widget _buildFloatingActionButton(
       IconData icon, String label, Function() onPressed) {
     return FloatingActionButton.extended(
@@ -392,6 +425,16 @@ class _LoginScreenState extends State<LoginScreen> {
         );
 
         if (userCredential != null) {
+          // Verifica si el Checkbox está marcado
+          bool isCheckboxChecked =
+              GlobalValues.session.getBool('check') ?? false;
+
+          // Si el Checkbox está marcado, actualiza la sesión
+          if (isCheckboxChecked) {
+            setState(() {
+              GlobalValues.session.setBool('session', true);
+            });
+          }
           // Autenticación exitosa, redirigir a la pantalla de inicio
           Navigator.pushNamed(context, '/inicio');
         } else {
@@ -420,18 +463,6 @@ class _LoginScreenState extends State<LoginScreen> {
             },
           );
         }
-      },
-    );
-  }
-
-  Widget _buildSessionCheckbox() {
-    return Checkbox(
-      value: GlobalValues.session.getBool('session') ?? false,
-      activeColor: Colors.orange,
-      onChanged: (bool? newbool) {
-        setState(() {
-          GlobalValues.session.setBool('session', newbool!);
-        });
       },
     );
   }
