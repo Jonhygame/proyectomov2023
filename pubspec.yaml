@@ -31,7 +31,7 @@ dependencies:
   google_fonts: ^4.0.4
   google_sign_in: ^6.1.6
   sign_in_button: ^3.0.0
-  github_sign_in_plus: ^0.0.1  
+  github_sign_in_plus: ^0.0.1 
 
 dev_dependencies:
   flutter_test:

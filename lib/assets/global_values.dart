@@ -11,10 +11,12 @@ class GlobalValues {
   static late SharedPreferences prefs;
   static late SharedPreferences teme;
   static late SharedPreferences session;
+  static late SharedPreferences check;
 
   static Future<void> configPrefs() async {
     prefs = await SharedPreferences.getInstance();
     teme = await SharedPreferences.getInstance();
     session = await SharedPreferences.getInstance();
+    check = await SharedPreferences.getInstance();
   }
 }

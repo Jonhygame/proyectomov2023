@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/assets/styles_app.dart';
 import 'package:proyectomov2023/routes.dart';
+import 'package:proyectomov2023/screens/inicio_screen.dart';
 import 'package:proyectomov2023/screens/login_screen.dart';
 
 void main() async {
@@ -20,18 +21,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     GlobalValues.flagTheme.value = GlobalValues.teme.getBool('teme') ?? false;
+
     return ValueListenableBuilder(
-        valueListenable: GlobalValues.flagTheme,
-        builder: (context, value, _) {
-          return MaterialApp(
-              home: GlobalValues.session.getBool('session') ?? false
-                  ? const DashboardScreen()
-                  : const LoginScreen(),
-              routes: getRoutes(),
-              //theme: ThemeData.dark(),
-              theme: value
-                  ? StylesApp.darkTheme(context)
-                  : StylesApp.lightTheme(context));
-        });
+      valueListenable: GlobalValues.flagTheme,
+      builder: (context, value, _) {
+        // Verificar si la casilla de verificación está activada
+        bool isSessionActive = GlobalValues.session.getBool('session') ?? false;
+
+        // Redirigir a la pantalla correspondiente
+        Widget initialScreen =
+            isSessionActive ? const InicioScreen() : const LoginScreen();
+
+        return MaterialApp(
+          home: initialScreen,
+          routes: getRoutes(),
+          theme: value
+              ? StylesApp.darkTheme(context)
+              : StylesApp.lightTheme(context),
+        );
+      },
+    );
   }
 }
