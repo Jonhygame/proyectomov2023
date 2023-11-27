@@ -7,14 +7,14 @@ import 'package:proyectomov2023/screens/dashboard_screen.dart';
 import 'package:proyectomov2023/screens/settings_screen.dart';
 import 'package:proyectomov2023/widgets/CardLaboratiorioWidget.dart';
 
-class InicioScreen extends StatefulWidget {
-  const InicioScreen({super.key});
+class ListarEquipoScreen extends StatefulWidget {
+  const ListarEquipoScreen({super.key});
 
   @override
-  State<InicioScreen> createState() => _InicioScreenState();
+  State<ListarEquipoScreen> createState() => _ListarEquipoScreenState();
 }
 
-class _InicioScreenState extends State<InicioScreen> {
+class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
   Data? data;
   String searchTerm = '';
   int? selectedTaskStatus;
@@ -66,72 +66,6 @@ class _InicioScreenState extends State<InicioScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: CurvedNavigationBar(
-          height: 55,
-          color: Colors.blueGrey.shade100,
-          animationDuration: Duration(milliseconds: 600),
-          backgroundColor: Colors.blueGrey,
-          index: 0,
-          onTap: (index) {
-            switch (index) {
-              case 0:
-                print('caso 0 ');
-                //pantalla actual
-                break;
-              case 1:
-                print('caso 1 ');
-                Future.delayed(Duration(milliseconds: 600), () {
-                  Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          DashboardScreen(),
-                      settings: RouteSettings(name: '/dashboard'),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return child;
-                      },
-                      transitionDuration: Duration(milliseconds: 0),
-                    ),
-                  );
-                });
-                break;
-              case 2:
-                print('caso 2 ');
-                Future.delayed(Duration(milliseconds: 600), () {
-                  Navigator.push(
-                    context,
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) =>
-                          SettingsScreen(),
-                      settings: RouteSettings(name: '/settings'),
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        return child;
-                      },
-                      transitionDuration: Duration(milliseconds: 0),
-                    ),
-                  );
-                });
-                break;
-              default:
-                print('nada');
-            }
-          },
-          items: [
-            Icon(
-              Icons.home,
-              color: Colors.blueGrey,
-            ),
-            Icon(
-              Icons.map,
-              color: Colors.blueGrey,
-            ),
-            Icon(
-              Icons.list,
-              color: Colors.blueGrey,
-            ),
-          ]),
       body: ValueListenableBuilder(
         valueListenable: GlobalValues.flagPR4Task,
         builder: (context, value, _) {
