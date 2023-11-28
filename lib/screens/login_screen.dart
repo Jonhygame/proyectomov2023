@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   TextEditingController emailResetController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -173,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                   }
 
-                  Navigator.pushNamed(context, '/inicio');
+                  Navigator.pushReplacementNamed(context, '/inicio');
                   // Credenciales incorrectas, mostrar un showDialog
                   // ignore: use_build_context_synchronously
                 }
@@ -205,10 +207,34 @@ class _LoginScreenState extends State<LoginScreen> {
         idToken: googleSignInAuthentication.idToken,
       );
 
-      return await _auth.signInWithCredential(credential);
+      // Autenticar con Firebase
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      // Crear usuario en Firebase
+      await createUserInFirebase(userCredential);
+
+      return userCredential;
     } catch (error) {
       print("Error durante la autenticación con Google: $error");
       return null;
+    }
+  }
+
+  Future<void> createUserInFirebase(UserCredential userCredential) async {
+    try {
+      // Obtener datos del usuario
+      var user = userCredential.user;
+      var email = user!.email;
+
+      // Crear usuario en Firestore
+      await _firestore.collection('users').doc(user.uid).set({
+        'correo': email,
+        // Puedes agregar más información del usuario aquí si es necesario
+      });
+    } catch (e) {
+      print('Error al crear usuario en Firebase: $e');
+      // Puedes manejar el error según tus necesidades
     }
   }
 
@@ -224,16 +250,34 @@ class _LoginScreenState extends State<LoginScreen> {
     var result = await gitHubSignIn.signIn(context);
     switch (result.status) {
       case GitHubSignInResultStatus.ok:
-        // Verifica si el Checkbox está marcado
-        bool isCheckboxChecked = GlobalValues.session.getBool('check') ?? false;
+        try {
+          String githubToken = result.token ?? "";
 
-        // Si el Checkbox está marcado, actualiza la sesión
-        if (isCheckboxChecked) {
-          setState(() {
-            GlobalValues.session.setBool('session', true);
-          });
+          // Autenticar en Firebase con GitHub
+          AuthCredential credential =
+              GithubAuthProvider.credential(githubToken);
+          UserCredential userCredential =
+              await FirebaseAuth.instance.signInWithCredential(credential);
+
+          // Crear usuario en Firebase (si no existe)
+          await createUserInFirebase(userCredential);
+
+          // Verifica si el Checkbox está marcado
+          bool isCheckboxChecked =
+              GlobalValues.session.getBool('check') ?? false;
+
+          // Si el Checkbox está marcado, actualiza la sesión
+          if (isCheckboxChecked) {
+            setState(() {
+              GlobalValues.session.setBool('session', true);
+            });
+          }
+
+          Navigator.pushReplacementNamed(context, '/inicio');
+        } catch (e) {
+          print("Error durante la autenticación con GitHub en Firebase: $e");
+          // Trata el error según tus necesidades
         }
-        Navigator.pushNamed(context, '/inicio');
         break;
 
       case GitHubSignInResultStatus.cancelled:
@@ -260,6 +304,7 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         );
         break;
+
       case GitHubSignInResultStatus.failed:
         showDialog(
           context: context,
@@ -436,7 +481,7 @@ class _LoginScreenState extends State<LoginScreen> {
             });
           }
           // Autenticación exitosa, redirigir a la pantalla de inicio
-          Navigator.pushNamed(context, '/inicio');
+          Navigator.pushReplacementNamed(context, '/inicio');
         } else {
           // Credenciales incorrectas, mostrar un showDialog
           // ignore: use_build_context_synchronously
@@ -445,7 +490,7 @@ class _LoginScreenState extends State<LoginScreen> {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: Text('Credenciales incorrectas'),
-                content: Text('Por favor, verifica tu correo y contraseña.'),
+                content: Text('Por favor, verifica tu correo, contraseña o .'),
                 actions: [
                   TextButton(
                     onPressed: () {

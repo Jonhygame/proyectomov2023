@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:proyectomov2023/firebase/email_auth.dart';
 import 'package:sign_in_button/sign_in_button.dart';
@@ -16,19 +17,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final conPassUser = TextEditingController();
   final emailAuth = EmailAuth();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<bool> checkIfUserExists(String email) async {
     try {
+      // Convertir el correo electrónico a minúsculas
+      String lowercaseEmail = email.toLowerCase();
+
       QuerySnapshot<Map<String, dynamic>> query = await _firestore
           .collection('users')
-          .where('correo', isEqualTo: email)
+          .where('correo', isEqualTo: lowercaseEmail)
           .get();
 
-      print('Esto es lo que arrojó' + query.toString());
-
-      if (query != null) {
+      // Verifica si la consulta contiene documentos
+      if (query.docs.isNotEmpty) {
+        print('Usuario encontrado con el correo: $email');
         return true;
       } else {
+        print('Usuario no encontrado con el correo: $email');
         return false;
       }
     } catch (e) {
@@ -115,6 +121,7 @@ class RegisterForm extends StatelessWidget {
               conEmailUser: conEmailUser,
               conPassUser: conPassUser,
               emailAuth: emailAuth,
+              conNameUser: conName,
               checkIfUserExists: checkIfUserExists,
             ),
           ],
@@ -194,17 +201,21 @@ class PasswordTextField extends StatelessWidget {
 }
 
 class RegisterButton extends StatelessWidget {
-  const RegisterButton({
+  RegisterButton({
     required this.conEmailUser,
     required this.conPassUser,
+    required this.conNameUser,
     required this.emailAuth,
     required this.checkIfUserExists,
   });
 
   final TextEditingController conEmailUser;
   final TextEditingController conPassUser;
+  final TextEditingController conNameUser;
   final EmailAuth emailAuth;
   final Future<bool> Function(String) checkIfUserExists;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -213,6 +224,7 @@ class RegisterButton extends StatelessWidget {
       onPressed: () async {
         var email = conEmailUser.text;
         var pass = conPassUser.text;
+        var name = conNameUser.text;
 
         // Validar si el usuario ya existe
         bool userExists = await checkIfUserExists(email);
@@ -245,7 +257,8 @@ class RegisterButton extends StatelessWidget {
           );
         } else {
           // Llamada a la función para crear el usuario
-          await emailAuth.createUser(emailUser: email, pwdUser: pass);
+          await emailAuth.createUser(
+              emailUser: email, pwdUser: pass, nameUser: name);
 
           // Mostrar el diálogo indicando al usuario que revise su correo
           showDialog(
