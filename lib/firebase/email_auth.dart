@@ -5,13 +5,25 @@ class EmailAuth {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Future<bool> createUser(
-      {required String emailUser, required String pwdUser}) async {
+      {required String emailUser,
+      required String pwdUser,
+      required String nameUser}) async {
     try {
       final credentials = await auth.createUserWithEmailAndPassword(
-          email: emailUser, password: pwdUser);
-      credentials.user!.sendEmailVerification();
+        email: emailUser,
+        password: pwdUser,
+      );
+
+      // Enviar verificación de correo electrónico
+      await credentials.user!.sendEmailVerification();
+
+      // Guardar datos en Firestore
+      await _firestore.collection('users').doc(credentials.user!.uid).set(
+          {'correo': emailUser, 'contraseña': pwdUser, 'nombre': nameUser});
+
       return true;
     } catch (e) {
+      print('Error al registrar usuario: $e');
       return false;
     }
   }
@@ -24,7 +36,9 @@ class EmailAuth {
         password: password,
       );
 
-      return userCredential;
+      if (userCredential.user!.emailVerified) {
+        return userCredential;
+      }
     } catch (e) {
       print("Error de autenticación con correo y contraseña: $e");
       return null;
