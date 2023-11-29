@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:proyectomov2023/screens/add_Equipos.dart';
 import 'package:proyectomov2023/screens/add_laboratorios.dart';
 import 'package:proyectomov2023/screens/dashboard_screen.dart';
 import 'package:proyectomov2023/screens/inicio_screen.dart';
@@ -15,6 +16,6 @@ Map<String, WidgetBuilder> getRoutes() {
     '/addLab': (BuildContext context) => AddLaboratorio(),
     '/register': (BuildContext context) => RegisterScreen(),
     '/listarEquipos': (BuildContext context) => ListarEquipoScreen(),
-    '/login': (BuildContext context) => LoginScreen(),
+    '/addEquipo': (BuildContext context) => addEquipo(),
   };
 }

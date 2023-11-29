@@ -74,7 +74,7 @@ class _CardLaboratorioWidgetState extends State<CardLaboratorioWidget> {
               IconButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/listarEquipos',
-                      arguments: widget.laboratorioModel);
+                      arguments: {'id': widget.laboratorioModel.nombre});
                 },
                 icon: Icon(
                   Icons.arrow_right_sharp,

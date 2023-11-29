@@ -140,8 +140,15 @@ class Data {
 
   Future<List<LaboratorioModel>> GETALLLABS() async {
     var conexion = await database;
-    var result = await conexion!.query('tblTareas');
+    var result = await conexion!.query('Laboratorios');
     return result.map((task) => LaboratorioModel.fromMap(task)).toList();
+  }
+
+  Future<List<EquipoModel>> GETALLEQUIPOS(id) async {
+    var conexion = await database;
+    var result = await conexion!
+        .query('Equipo', where: 'ID_Laboratorio = ?', whereArgs: [id]);
+    return result.map((task) => EquipoModel.fromMap(task)).toList();
   }
 
   Future<List<EquipoModel>> SELECTEQUIPOS(id) async {
@@ -223,21 +230,25 @@ class Data {
     return conexion!.delete(tblName, where: '$whereCampo = ?', whereArgs: [id]);
   }
 
-  Future<List<LaboratorioModel>> searchLab(
-      String searchTerm, int? selectedTaskStatus) async {
+  Future<List<LaboratorioModel>> searchLab(String searchTerm) async {
     var conexion = await database;
     String whereClause = 'Nombre LIKE ?';
     List<dynamic> whereArgs = ['%$searchTerm%'];
 
-    if (selectedTaskStatus != null) {
-      whereClause += ' AND realizada = ?';
-      whereArgs.add(selectedTaskStatus);
-    }
     var result = await conexion!
         .query('Laboratorios', where: whereClause, whereArgs: whereArgs);
     return result.map((task) => LaboratorioModel.fromMap(task)).toList();
   }
 
+  Future<List<EquipoModel>> searchEquipo(String id, String searchTerm) async {
+    var conexion = await database;
+    String whereClause = 'Nombre LIKE ? or ID_Laboratorio = ?';
+    List<dynamic> whereArgs = ['%$searchTerm%, %$id%'];
+
+    var result = await conexion!
+        .query('Equipo', where: whereClause, whereArgs: whereArgs);
+    return result.map((task) => EquipoModel.fromMap(task)).toList();
+  }
   /*
   Future<List<CareerModel>> searchCarreras(String searchTerm) async {
     var conexion = await database;

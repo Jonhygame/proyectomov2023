@@ -35,6 +35,7 @@ class _InicioScreenState extends State<InicioScreen> {
             color: Colors.white,
           ),
         ),
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.blueGrey,
         actions: [
           IconButton(
@@ -53,7 +54,7 @@ class _InicioScreenState extends State<InicioScreen> {
                 TextField(
                   onChanged: (value) {
                     setState(() {
-                      value = value;
+                      searchTerm = value;
                     });
                   },
                   decoration: InputDecoration(
@@ -136,7 +137,7 @@ class _InicioScreenState extends State<InicioScreen> {
         valueListenable: GlobalValues.flagPR4Task,
         builder: (context, value, _) {
           return FutureBuilder(
-              future: data!.searchLab(searchTerm, selectedTaskStatus),
+              future: data!.searchLab(searchTerm),
               builder: (BuildContext context,
                   AsyncSnapshot<List<LaboratorioModel>> snapshot) {
                 if (snapshot.hasData) {

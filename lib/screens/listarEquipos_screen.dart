@@ -1,11 +1,7 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/database/database.dart';
-import 'package:proyectomov2023/models/laboratorios_model.dart';
-import 'package:proyectomov2023/screens/dashboard_screen.dart';
-import 'package:proyectomov2023/screens/settings_screen.dart';
-import 'package:proyectomov2023/widgets/CardLaboratiorioWidget.dart';
+import 'package:proyectomov2023/models/equipo_model.dart';
 
 class ListarEquipoScreen extends StatefulWidget {
   const ListarEquipoScreen({super.key});
@@ -27,11 +23,14 @@ class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final datos =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Laboratorios',
-          style: TextStyle(
+        title: Text(
+          'Laboratorio ' + datos['id'].toString(),
+          style: const TextStyle(
             color: Colors.white,
           ),
         ),
@@ -39,7 +38,7 @@ class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
         actions: [
           IconButton(
               onPressed: () =>
-                  Navigator.pushNamed(context, '/addLab').then((value) {
+                  Navigator.pushNamed(context, '/addEquipo').then((value) {
                     setState(() {});
                   }),
               icon: const Icon(Icons.task)),
@@ -70,15 +69,15 @@ class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
         valueListenable: GlobalValues.flagPR4Task,
         builder: (context, value, _) {
           return FutureBuilder(
-              future: data!.searchLab(searchTerm, selectedTaskStatus),
+              future: data!.searchEquipo(datos['id'], searchTerm),
               builder: (BuildContext context,
-                  AsyncSnapshot<List<LaboratorioModel>> snapshot) {
+                  AsyncSnapshot<List<EquipoModel>> snapshot) {
                 if (snapshot.hasData) {
                   return ListView.builder(
                     itemCount: snapshot.data!.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return CardLaboratorioWidget(
-                          laboratorioModel: snapshot.data![index], data: data);
+                      //return CardLaboratorioWidget(laboratorioModel: snapshot.data![index], data: data);
+                      return Text('a');
                     },
                   );
                 } else {

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:proyectomov2023/database/database.dart';
 
-class AddLaboratorio extends StatefulWidget {
+class addEquipo extends StatefulWidget {
   @override
-  _AddLaboratorioState createState() => _AddLaboratorioState();
+  _addEquipoState createState() => _addEquipoState();
 }
 
-class _AddLaboratorioState extends State<AddLaboratorio> {
+class _addEquipoState extends State<addEquipo> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
   @override
@@ -69,13 +69,7 @@ class _AddLaboratorioState extends State<AddLaboratorio> {
               SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: _guardarLaboratorio,
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.blueGrey,
-                ),
-                child: Text(
-                  'Guardar',
-                  style: TextStyle(color: Colors.black),
-                ),
+                child: Text('Guardar'),
               ),
             ],
           ),
