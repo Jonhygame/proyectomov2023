@@ -17,5 +17,6 @@ Map<String, WidgetBuilder> getRoutes() {
     '/register': (BuildContext context) => RegisterScreen(),
     '/listarEquipos': (BuildContext context) => ListarEquipoScreen(),
     '/addEquipo': (BuildContext context) => addEquipo(),
+    '/login': (BuildContext context) => const LoginScreen(),
   };
 }
