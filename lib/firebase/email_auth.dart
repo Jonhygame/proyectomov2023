@@ -18,8 +18,12 @@ class EmailAuth {
       await credentials.user!.sendEmailVerification();
 
       // Guardar datos en Firestore
-      await _firestore.collection('users').doc(credentials.user!.uid).set(
-          {'correo': emailUser, 'contraseña': pwdUser, 'nombre': nameUser});
+      await _firestore.collection('users').doc(credentials.user!.uid).set({
+        'correo': emailUser,
+        'contraseña': pwdUser,
+        'nombre': nameUser,
+        'metodo': 'Correo'
+      });
 
       return true;
     } catch (e) {

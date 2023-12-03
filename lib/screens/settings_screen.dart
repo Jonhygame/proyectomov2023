@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/screens/dashboard_screen.dart';
 import 'package:proyectomov2023/screens/inicio_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -16,6 +17,7 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   TextEditingController emailResetController = TextEditingController();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -137,7 +139,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         icon: Icon(Icons.logout),
                         backgroundColor: Colors.red,
                         label: Text('Cerrar Sesión'),
-                        onPressed: () {
+                        onPressed: () async {
+                          // Cerrar sesión de Google
+                          await _handleSignOut();
+
                           setState(() {
                             GlobalValues.session.setBool('session', false);
                           });
@@ -271,5 +276,60 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       controller: controller,
     );
+  }
+
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleSignInAccount =
+          await _googleSignIn.signIn();
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount!.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      // Autenticar con Firebase
+      UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      // Crear usuario en Firebase
+
+      return userCredential;
+    } catch (error) {
+      // ignore: use_build_context_synchronously
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Un error ha ocurrido'),
+            content: Text('Error de autenticación con Google'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    color: Colors.black, // Cambia el color a negro
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Future<void> _handleSignOut() async {
+    try {
+      await _googleSignIn.signOut();
+    } catch (error) {
+      print('Error al cerrar sesión de Google: $error');
+      // Manejar el error según tus necesidades
+    }
   }
 }
