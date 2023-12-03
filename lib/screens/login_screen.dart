@@ -139,7 +139,21 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () async {
                 UserCredential? userCredential = await signInWithGoogle();
 
-                if (userCredential != null) {
+                if (userCredential?.user != null) {
+                  // Verifica si el Checkbox está marcado
+                  bool isCheckboxChecked =
+                      GlobalValues.session.getBool('check') ?? false;
+
+                  // Si el Checkbox está marcado, actualiza la sesión
+                  if (isCheckboxChecked) {
+                    setState(() {
+                      GlobalValues.session.setBool('session', true);
+                    });
+                  }
+
+                  Navigator.pushReplacementNamed(context, '/inicio');
+                } else {
+                  // Credenciales incorrectas, mostrar un showDialog
                   // ignore: use_build_context_synchronously
                   showDialog(
                     context: context,
@@ -163,21 +177,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       );
                     },
                   );
-                } else {
-                  // Verifica si el Checkbox está marcado
-                  bool isCheckboxChecked =
-                      GlobalValues.session.getBool('check') ?? false;
-
-                  // Si el Checkbox está marcado, actualiza la sesión
-                  if (isCheckboxChecked) {
-                    setState(() {
-                      GlobalValues.session.setBool('session', true);
-                    });
-                  }
-
-                  Navigator.pushReplacementNamed(context, '/inicio');
-                  // Credenciales incorrectas, mostrar un showDialog
-                  // ignore: use_build_context_synchronously
                 }
               },
             ),
@@ -212,16 +211,38 @@ class _LoginScreenState extends State<LoginScreen> {
           await _auth.signInWithCredential(credential);
 
       // Crear usuario en Firebase
-      await createUserInFirebase(userCredential);
+      await createUserInFirebase(userCredential, 'google');
 
       return userCredential;
     } catch (error) {
       print("Error durante la autenticación con Google: $error");
-      return null;
+      return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Un error ha ocurrido'),
+            content: Text('Error de autenticación con Google'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    color: Colors.black, // Cambia el color a negro
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
-  Future<void> createUserInFirebase(UserCredential userCredential) async {
+  Future<void> createUserInFirebase(
+      UserCredential userCredential, String loginMethod) async {
     try {
       // Obtener datos del usuario
       var user = userCredential.user;
@@ -230,7 +251,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Crear usuario en Firestore
       await _firestore.collection('users').doc(user.uid).set({
         'correo': email,
-        // Puedes agregar más información del usuario aquí si es necesario
+        'metodo': loginMethod,
       });
     } catch (e) {
       print('Error al crear usuario en Firebase: $e');
@@ -260,7 +281,7 @@ class _LoginScreenState extends State<LoginScreen> {
               await FirebaseAuth.instance.signInWithCredential(credential);
 
           // Crear usuario en Firebase (si no existe)
-          await createUserInFirebase(userCredential);
+          await createUserInFirebase(userCredential, 'GitHub');
 
           // Verifica si el Checkbox está marcado
           bool isCheckboxChecked =
@@ -489,8 +510,9 @@ class _LoginScreenState extends State<LoginScreen> {
             context: context,
             builder: (BuildContext context) {
               return AlertDialog(
-                title: Text('Credenciales incorrectas'),
-                content: Text('Por favor, verifica tu correo, contraseña o .'),
+                title: const Text('Credenciales incorrectas'),
+                content:
+                    const Text('Por favor, verifica tu correo, contraseña o .'),
                 actions: [
                   TextButton(
                     onPressed: () {
