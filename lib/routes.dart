@@ -19,10 +19,7 @@ Map<String, WidgetBuilder> getRoutes() {
     '/listarEquipos': (BuildContext context) => const ListarEquipoScreen(),
     '/addEquipo': (BuildContext context) => addEquipo(),
     '/login': (BuildContext context) => const LoginScreen(),
-<<<<<<< HEAD
     '/selectDisp': (BuildContext context) => const SelectDispositivoScreen(),
     '/add': (BuildContext context) => const SelectDispositivoScreen(),
-=======
->>>>>>> 762f46d6a76a325bb87e8044001012a9bf628564
   };
 }
