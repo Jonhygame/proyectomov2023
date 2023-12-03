@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/database/database.dart';
 import 'package:proyectomov2023/models/equipo_model.dart';
+import 'package:proyectomov2023/models/equiposProyectores_model.dart';
 
 class ListarEquipoScreen extends StatefulWidget {
   const ListarEquipoScreen({super.key});
@@ -38,7 +39,7 @@ class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
         actions: [
           IconButton(
               onPressed: () =>
-                  Navigator.pushNamed(context, '/addEquipo').then((value) {
+                  Navigator.pushNamed(context, '/selectDisp').then((value) {
                     setState(() {});
                   }),
               icon: const Icon(Icons.task)),
@@ -72,6 +73,7 @@ class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
               future: data!.searchEquipo(datos['id'], searchTerm),
               builder: (BuildContext context,
                   AsyncSnapshot<List<EquipoModel>> snapshot) {
+                print(snapshot);
                 if (snapshot.hasData) {
                   return ListView.builder(
                     itemCount: snapshot.data!.length,
@@ -82,6 +84,7 @@ class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
                   );
                 } else {
                   if (snapshot.hasError) {
+                    //print(snapshot);
                     return const Center(
                       child: Text('Error!'),
                     );

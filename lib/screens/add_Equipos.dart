@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:proyectomov2023/database/database.dart';
+import 'package:proyectomov2023/models/disco_model.dart';
 
 class addEquipo extends StatefulWidget {
   @override
@@ -9,6 +10,8 @@ class addEquipo extends StatefulWidget {
 class _addEquipoState extends State<addEquipo> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
+  List<DiscoModel> discos = [];
+
   @override
   void dispose() {
     _nombreController.dispose();
@@ -46,7 +49,8 @@ class _addEquipoState extends State<addEquipo> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Agregar Laboratorio'),
+        title: Text('Agregar Equipo de computo'),
+        backgroundColor: Colors.blueGrey,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),

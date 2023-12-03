@@ -47,6 +47,7 @@ class _AddLaboratorioState extends State<AddLaboratorio> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Agregar Laboratorio'),
+        backgroundColor: Colors.blueGrey,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),

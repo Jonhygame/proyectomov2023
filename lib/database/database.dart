@@ -3,7 +3,9 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:proyectomov2023/models/equipo_model.dart';
+import 'package:proyectomov2023/models/equiposProyectores_model.dart';
 import 'package:proyectomov2023/models/laboratorios_model.dart';
+import 'package:proyectomov2023/models/proyector_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
@@ -88,7 +90,9 @@ class Data {
     CREATE TABLE Proyector (
     ID_Proyector INTEGER PRIMARY KEY,
     Marca VARCHAR(100),
-    Modelo VARCHAR(50)
+    Modelo VARCHAR(50),
+    ID_Laboratorio INTEGER,
+    FOREIGN KEY (ID_Laboratorio) REFERENCES Laboratorios(ID_Laboratorio)
     )
     ''');
     await db.execute('''
@@ -244,14 +248,13 @@ class Data {
     var conexion = await database;
     String whereClause = 'Nombre LIKE ? or ID_Laboratorio = ?';
     List<dynamic> whereArgs = ['%$searchTerm%, %$id%'];
-
     var result = await conexion!
         .query('Equipo', where: whereClause, whereArgs: whereArgs);
     return result.map((task) => EquipoModel.fromMap(task)).toList();
   }
   /*
   Future<List<CareerModel>> searchCarreras(String searchTerm) async {
-    var conexion = await database;
+    var conexion = await database;  
     var result = await conexion!.query('tblCarrera',
         where: 'nameCareer LIKE ?', whereArgs: ['%$searchTerm%']);
     return result.map((carrera) => CareerModel.fromMap(carrera)).toList();

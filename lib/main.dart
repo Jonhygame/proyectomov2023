@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:proyectomov2023/screens/dashboard_screen.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
