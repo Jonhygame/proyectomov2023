@@ -17,12 +17,15 @@ class EmailAuth {
       // Enviar verificación de correo electrónico
       await credentials.user!.sendEmailVerification();
 
+      var photoUrl = 'https://cdn-icons-png.flaticon.com/512/5087/5087509.png';
+
       // Guardar datos en Firestore
       await _firestore.collection('users').doc(credentials.user!.uid).set({
         'correo': emailUser,
         'contraseña': pwdUser,
         'nombre': nameUser,
-        'metodo': 'Correo'
+        'metodo': 'Correo',
+        'photo_url': photoUrl,
       });
 
       return true;

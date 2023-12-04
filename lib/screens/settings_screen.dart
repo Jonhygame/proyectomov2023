@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:day_night_switcher/day_night_switcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:octo_image/octo_image.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/screens/dashboard_screen.dart';
 import 'package:proyectomov2023/screens/inicio_screen.dart';
@@ -23,7 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Registro'),
+          title: Text('Ajustes'),
           backgroundColor: Color.fromARGB(255, 31, 166, 187),
         ),
         bottomNavigationBar: CurvedNavigationBar(
@@ -37,7 +39,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 case 0:
                   print('caso 0 ');
                   Future.delayed(Duration(milliseconds: 600), () {
-                    Navigator.push(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
@@ -46,15 +48,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
                           return child;
-                        }, // Establecer la duración a 0 para desactivar la transición
+                        },
                       ),
+                      (route) => false,
                     );
                   });
                   break;
                 case 1:
                   print('caso 1 ');
                   Future.delayed(Duration(milliseconds: 600), () {
-                    Navigator.push(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
@@ -64,7 +67,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             (context, animation, secondaryAnimation, child) {
                           return child;
                         },
+                        transitionDuration: Duration(milliseconds: 0),
                       ),
+                      (route) => false,
                     );
                   });
                   break;
@@ -92,6 +97,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ]),
         body: Stack(
           children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 100.0),
+            ),
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -102,7 +110,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             SingleChildScrollView(
               child: Container(
-                height: 300,
+                height: 500,
                 margin: const EdgeInsets.symmetric(horizontal: 30),
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
@@ -112,7 +120,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Center(
                   child: Column(
                     children: [
-                      const Text('Cambiar Tema'),
+                      _buildUserInfo(),
+                      const Text(
+                        'Cambiar Tema',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(left: 20, right: 20),
                         child: DayNightSwitcher(
@@ -146,7 +158,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           setState(() {
                             GlobalValues.session.setBool('session', false);
                           });
-                          Navigator.pushReplacementNamed(context, '/login');
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            '/login',
+                            (route) =>
+                                false, // Elimina todas las rutas anteriores
+                          );
                         },
                       )
                     ],
@@ -275,6 +292,73 @@ class _SettingsScreenState extends State<SettingsScreen> {
             true, // Alinea el texto del placeholder con el texto ingresado
       ),
       controller: controller,
+    );
+  }
+
+  Widget _buildUserInfo() {
+    var user = _auth.currentUser;
+    var displayName = user?.displayName;
+    var email = user?.email;
+
+    // Obtener la URL de la foto del usuario desde Firestore
+    Future<String?> getUserPhotoUrl() async {
+      String? photoUrl;
+      try {
+        var snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user?.uid)
+            .get();
+
+        if (snapshot.exists) {
+          var userData = snapshot.data() as Map<String, dynamic>;
+          photoUrl = userData['photo_url'];
+        }
+      } catch (e) {
+        print('Error al obtener la URL de la foto del usuario: $e');
+      }
+      return photoUrl;
+    }
+
+    return FutureBuilder<String?>(
+      future: getUserPhotoUrl(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          var photoUrl = snapshot.data ?? user?.photoURL;
+
+          return Column(
+            children: [
+              SizedBox(
+                height: 100,
+                child: OctoImage.fromSet(
+                  image: NetworkImage(photoUrl ?? ''),
+                  octoSet: OctoSet.circleAvatar(
+                    backgroundColor: Colors.transparent,
+                    text: Text(
+                      displayName?.isNotEmpty == true
+                          ? displayName![0]
+                          : email?.isNotEmpty == true
+                              ? email![0]
+                              : '',
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                displayName ?? email ?? '',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          );
+        } else {
+          // Puedes mostrar un indicador de carga mientras se recupera la URL de la foto
+          return CircularProgressIndicator();
+        }
+      },
     );
   }
 
