@@ -247,11 +247,13 @@ class _LoginScreenState extends State<LoginScreen> {
       // Obtener datos del usuario
       var user = userCredential.user;
       var email = user!.email;
+      var photoUrl = user.photoURL;
 
       // Crear usuario en Firestore
       await _firestore.collection('users').doc(user.uid).set({
         'correo': email,
         'metodo': loginMethod,
+        'photo_url': photoUrl,
       });
     } catch (e) {
       print('Error al crear usuario en Firebase: $e');
@@ -295,10 +297,11 @@ class _LoginScreenState extends State<LoginScreen> {
           }
 
           Navigator.pushReplacementNamed(context, '/inicio');
-        } catch (e) {
-          print("Error durante la autenticación con GitHub en Firebase: $e");
-          // Trata el error según tus necesidades
+        } catch (error) {
+          // Manejar errores de autenticación
+          print("Error de autenticación: $error");
         }
+
         break;
 
       case GitHubSignInResultStatus.cancelled:

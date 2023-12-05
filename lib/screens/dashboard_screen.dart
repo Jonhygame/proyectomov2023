@@ -26,7 +26,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               case 0:
                 print('caso 0 ');
                 Future.delayed(Duration(milliseconds: 600), () {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
@@ -37,6 +37,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         return child;
                       },
                     ),
+                    (route) => false,
                   );
                 });
                 break;
@@ -47,7 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               case 2:
                 print('caso 2 ');
                 Future.delayed(Duration(milliseconds: 600), () {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
@@ -57,7 +58,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           (context, animation, secondaryAnimation, child) {
                         return child;
                       },
+                      transitionDuration: Duration(milliseconds: 0),
                     ),
+                    (route) => false,
                   );
                 });
                 break;

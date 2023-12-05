@@ -39,9 +39,14 @@ class _InicioScreenState extends State<InicioScreen> {
         backgroundColor: Colors.blueGrey,
         actions: [
           IconButton(
-              onPressed: () =>
-                  Navigator.pushNamed(context, '/addLab').then((value) {
-                    setState(() {});
+              onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    '/addLab',
+                    (route) => false,
+                  ).then((value) {
+                    setState(() {
+                      // Puedes realizar acciones después de que se complete la navegación
+                    });
                   }),
               icon: const Icon(Icons.task)),
         ],
@@ -82,7 +87,7 @@ class _InicioScreenState extends State<InicioScreen> {
               case 1:
                 print('caso 1 ');
                 Future.delayed(Duration(milliseconds: 600), () {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
@@ -94,13 +99,14 @@ class _InicioScreenState extends State<InicioScreen> {
                       },
                       transitionDuration: Duration(milliseconds: 0),
                     ),
+                    (route) => false,
                   );
                 });
                 break;
               case 2:
                 print('caso 2 ');
                 Future.delayed(Duration(milliseconds: 600), () {
-                  Navigator.push(
+                  Navigator.pushAndRemoveUntil(
                     context,
                     PageRouteBuilder(
                       pageBuilder: (context, animation, secondaryAnimation) =>
@@ -112,6 +118,7 @@ class _InicioScreenState extends State<InicioScreen> {
                       },
                       transitionDuration: Duration(milliseconds: 0),
                     ),
+                    (route) => false,
                   );
                 });
                 break;

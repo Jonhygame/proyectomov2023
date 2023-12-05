@@ -131,6 +131,57 @@ class RegisterForm extends StatelessWidget {
   }
 }
 
+class PasswordTextField extends StatelessWidget {
+  const PasswordTextField({required this.conPassUser});
+
+  final TextEditingController conPassUser;
+
+  bool isPasswordValid(String password) {
+    if (password.length < 6) {
+      return false;
+    }
+
+    if (!password.contains(RegExp(r'[A-Z]'))) {
+      return false;
+    }
+
+    if (!password.contains(RegExp(r'[a-z]'))) {
+      return false;
+    }
+
+    if (!password.contains(RegExp(r'[0-9]'))) {
+      return false;
+    }
+
+    return true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: 'Password',
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      controller: conPassUser,
+      obscureText: true,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Por favor, ingresa una contraseña';
+        }
+
+        if (!isPasswordValid(value)) {
+          return 'La contraseña debe tener al menos 6 caracteres, incluyendo al menos 1 mayúscula, 1 minúscula y 1 número';
+        }
+
+        return null;
+      },
+    );
+  }
+}
+
 class LogoImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -176,26 +227,6 @@ class EmailTextField extends StatelessWidget {
         fillColor: Colors.white,
       ),
       controller: conEmailUser,
-    );
-  }
-}
-
-class PasswordTextField extends StatelessWidget {
-  const PasswordTextField({required this.conPassUser});
-
-  final TextEditingController conPassUser;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      decoration: const InputDecoration(
-        border: OutlineInputBorder(),
-        labelText: 'Password',
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      controller: conPassUser,
-      obscureText: true,
     );
   }
 }
@@ -256,40 +287,120 @@ class RegisterButton extends StatelessWidget {
             },
           );
         } else {
-          // Llamada a la función para crear el usuario
-          await emailAuth.createUser(
-              emailUser: email, pwdUser: pass, nameUser: name);
-
-          // Mostrar el diálogo indicando al usuario que revise su correo
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Verifica tu correo'),
-                content: Text(
-                  'Hemos enviado un correo de verificación a $email. Por favor, revisa tu bandeja de entrada y sigue las instrucciones para completar tu registro.',
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      // Cerrar el diálogo
-                      Navigator.pop(context);
-
-                      // Cerrar la pantalla actual y mover al usuario al LoginScreen
-                      Navigator.popAndPushNamed(context, '/login');
-                    },
-                    child: Text(
-                      'OK',
-                      style: TextStyle(color: Colors.black),
-                    ),
+          // Validar el formato del correo electrónico
+          if (!isEmailValid(email)) {
+            // Mostrar el diálogo indicando que el correo electrónico no es válido
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Correo electrónico no válido'),
+                  content: Text(
+                    'Por favor, ingresa un correo electrónico válido.',
                   ),
-                ],
-              );
-            },
-          );
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Cerrar el diálogo
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'OK',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          } else if (!isPasswordValid(pass)) {
+            // Validar la contraseña
+            // Mostrar el diálogo indicando que la contraseña no es válida
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Contraseña no válida'),
+                  content: Text(
+                    'La contraseña debe tener al menos 6 caracteres, incluyendo al menos 1 mayúscula, 1 minúscula y 1 número.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Cerrar el diálogo
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        'OK',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          } else {
+            // Llamada a la función para crear el usuario
+            await emailAuth.createUser(
+                emailUser: email, pwdUser: pass, nameUser: name);
+
+            // Mostrar el diálogo indicando al usuario que revise su correo
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: Text('Verifica tu correo'),
+                  content: Text(
+                    'Hemos enviado un correo de verificación a $email. Por favor, revisa tu bandeja de entrada y sigue las instrucciones para completar tu registro.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Cerrar el diálogo
+                        Navigator.pop(context);
+
+                        // Cerrar la pantalla actual y mover al usuario al LoginScreen
+                        Navigator.popAndPushNamed(context, '/login');
+                      },
+                      child: Text(
+                        'OK',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
         }
       },
       text: 'Registra tu correo',
     );
   }
+}
+
+bool isEmailValid(String email) {
+  // Utiliza una expresión regular para validar el formato del correo electrónico
+  return RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$')
+      .hasMatch(email);
+}
+
+bool isPasswordValid(String password) {
+  if (password.length < 6) {
+    return false;
+  }
+
+  if (!password.contains(RegExp(r'[A-Z]'))) {
+    return false;
+  }
+
+  if (!password.contains(RegExp(r'[a-z]'))) {
+    return false;
+  }
+
+  if (!password.contains(RegExp(r'[0-9]'))) {
+    return false;
+  }
+
+  return true;
 }
