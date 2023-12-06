@@ -1,13 +1,21 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:day_night_switcher/day_night_switcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:octo_image/octo_image.dart';
+import 'package:provider/provider.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
+import 'package:proyectomov2023/assets/theme_provider.dart';
 import 'package:proyectomov2023/screens/dashboard_screen.dart';
 import 'package:proyectomov2023/screens/inicio_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:proyectomov2023/services/select_image.dart';
+import 'package:proyectomov2023/services/upload_image.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -20,13 +28,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   TextEditingController emailResetController = TextEditingController();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  late String userId; // Agrega esta línea para definir userId
+  File? imagen_to_upload;
+  // Obtén el ThemeProvider del contexto
+
+  @override
+  void initState() {
+    super.initState();
+    // Obtener la identificación del usuario al inicializar el widget
+    getUserId();
+  }
+
+  Future<void> getUserId() async {
+    var user = _auth.currentUser;
+    userId = user?.uid ??
+        ''; // Puedes establecer un valor predeterminado o manejarlo según tus necesidades
+  }
+
   @override
   Widget build(BuildContext context) {
+    var user = _auth.currentUser;
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Ajustes'),
-          backgroundColor: Color.fromARGB(255, 31, 166, 187),
+          title: Text(
+            'Ajustes',
+            style: TextStyle(
+              color: GlobalValues.flagTheme.value
+                  ? Colors.white // Texto en modo oscuro
+                  : Colors.white, // Texto en modo claro
+            ),
+          ),
+          backgroundColor: GlobalValues.flagTheme.value
+              ? Color.fromARGB(255, 34, 118, 254)
+              : Color.fromARGB(255, 31, 166, 187),
         ),
         bottomNavigationBar: CurvedNavigationBar(
             height: 55,
@@ -103,7 +138,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/Fondo.jpg'),
+                  image: AssetImage(
+                    GlobalValues.flagTheme.value
+                        ? 'assets/images/FondoNegro.jpg'
+                        : 'assets/images/Fondo.jpg',
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -115,12 +154,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: Color.fromARGB(255, 31, 166, 187),
+                  color: GlobalValues.flagTheme.value
+                      ? Color.fromARGB(255, 254, 133, 34)
+                      : Color.fromARGB(255, 31, 166, 187),
                 ),
                 child: Center(
                   child: Column(
                     children: [
-                      _buildUserInfo(),
+                      imagen_to_upload != null
+                          ? _buildUserImageWidget(imagen_to_upload)
+                          : _buildUserInfo(),
                       const Text(
                         'Cambiar Tema',
                         style: TextStyle(color: Colors.white),
@@ -137,6 +180,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             });
                           },
                         ),
+                      ),
+                      const SizedBox(height: 20),
+                      FutureBuilder<bool>(
+                        future: _checkUserMethod(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.done) {
+                            bool isUserMethodCorreo = snapshot.data ?? false;
+                            // Mostrar el botón solo si el método es 'Correo'
+                            return isUserMethodCorreo
+                                ? FloatingActionButton.extended(
+                                    backgroundColor: Colors.white,
+                                    label: Text(
+                                      'Cambiar Imagen',
+                                      style: TextStyle(color: Colors.black),
+                                    ),
+                                    onPressed: () async {
+                                      final XFile? imagen = await getImage();
+                                      setState(() {
+                                        imagen_to_upload = File(imagen!.path);
+                                      });
+                                      if (imagen_to_upload == null) {
+                                        return;
+                                      }
+                                      final updloaded =
+                                          await uploadImage(imagen_to_upload!);
+
+                                      String? newPhotoUrl =
+                                          await uploadImage(imagen_to_upload!);
+
+                                      if (newPhotoUrl != null) {
+                                        imagen_to_upload = null;
+                                        // Actualizar la URL de la foto en Firestore
+                                        await updatePhotoUrl(
+                                            user?.uid, newPhotoUrl);
+
+                                        setState(() {
+                                          // Actualizar la UI con la nueva foto
+                                        });
+                                      }
+                                    },
+                                  )
+                                : Container(); // Ocultar el botón si el método no es 'Correo'
+                          } else {
+                            return CircularProgressIndicator();
+                          }
+                        },
                       ),
                       const SizedBox(height: 20),
                       FloatingActionButton.extended(
@@ -295,6 +385,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Widget _buildUserImageWidget(File? imageFile) {
+    var user = _auth.currentUser;
+    var displayName = user?.displayName;
+    var email = user?.email;
+    return Column(
+      children: [
+        SizedBox(
+          height: 100,
+          child: OctoImage.fromSet(
+            image: FileImage(imageFile!),
+            octoSet: OctoSet.circleAvatar(
+              backgroundColor: Colors.transparent,
+              text: Text(
+                'Your Text',
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(
+            height:
+                8), // Ajusta el espacio entre la imagen y el texto según tus necesidades
+        Text(
+          displayName ?? email ?? '',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildUserInfo() {
     var user = _auth.currentUser;
     var displayName = user?.displayName;
@@ -362,6 +485,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  Future<void> updatePhotoUrl(String? userId, String photoUrl) async {
+    try {
+      // Referencia al documento del usuario en Firestore
+      DocumentReference userReference =
+          FirebaseFirestore.instance.collection('users').doc(userId);
+
+      // Actualizar el campo 'photo_url' con la nueva URL
+      await userReference.update({'photo_url': photoUrl});
+    } catch (e) {
+      print('Error al actualizar la URL de la foto en Firestore: $e');
+    }
+  }
+
   Future<UserCredential?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleSignInAccount =
@@ -415,5 +551,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
       print('Error al cerrar sesión de Google: $error');
       // Manejar el error según tus necesidades
     }
+  }
+
+  Future<bool> _checkUserMethod() async {
+    var user = _auth.currentUser;
+    try {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user?.uid)
+          .get();
+
+      if (snapshot.exists) {
+        var userData = snapshot.data() as Map<String, dynamic>;
+        var userMethod = userData['metodo'];
+        return userMethod == 'Correo';
+      }
+    } catch (e) {
+      print('Error al verificar el método del usuario: $e');
+    }
+    return false; // Valor predeterminado si hay un error
   }
 }

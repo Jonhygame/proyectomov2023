@@ -36,9 +36,17 @@ class _LoginScreenState extends State<LoginScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Inicio de sesión'),
-          backgroundColor: Color.fromARGB(255, 31, 166, 187),
-          // Agrega más configuraciones de AppBar según tus necesidades
+          title: Text(
+            'Inicio de sesión',
+            style: TextStyle(
+              color: GlobalValues.flagTheme.value
+                  ? Colors.white // Texto en modo oscuro
+                  : Colors.white, // Texto en modo claro
+            ),
+          ),
+          backgroundColor: GlobalValues.flagTheme.value
+              ? Color.fromARGB(255, 34, 118, 254)
+              : Color.fromARGB(255, 31, 166, 187),
         ),
         body: Stack(
           children: [
@@ -46,7 +54,11 @@ class _LoginScreenState extends State<LoginScreen> {
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/Fondo.jpg'),
+                  image: AssetImage(
+                    GlobalValues.flagTheme.value
+                        ? 'assets/images/FondoNegro.jpg'
+                        : 'assets/images/Fondo.jpg',
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -73,7 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(30),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: Color.fromARGB(255, 31, 166, 187),
+          color: GlobalValues.flagTheme.value
+              ? Color.fromARGB(255, 254, 133, 34)
+              : Color.fromARGB(255, 31, 166, 187),
         ),
         child: Column(
           children: [
@@ -242,12 +256,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> createUserInFirebase(
-      UserCredential userCredential, String loginMethod) async {
+      UserCredential? userCredential, String loginMethod) async {
     try {
+      // Verifica si userCredential es nulo
+      if (userCredential == null || userCredential.user == null) {
+        print('Error: userCredential o user nulos.');
+        return;
+      }
+
       // Obtener datos del usuario
-      var user = userCredential.user;
-      var email = user!.email;
+      var user = userCredential.user!;
+      var email = user.email;
       var photoUrl = user.photoURL;
+
+      // Verifica si email es nulo
+      if (email == null) {
+        print('Error: email nulo.');
+        return;
+      }
 
       // Crear usuario en Firestore
       await _firestore.collection('users').doc(user.uid).set({
@@ -275,7 +301,6 @@ class _LoginScreenState extends State<LoginScreen> {
       case GitHubSignInResultStatus.ok:
         try {
           String githubToken = result.token ?? "";
-
           // Autenticar en Firebase con GitHub
           AuthCredential credential =
               GithubAuthProvider.credential(githubToken);
@@ -288,22 +313,19 @@ class _LoginScreenState extends State<LoginScreen> {
           // Verifica si el Checkbox está marcado
           bool isCheckboxChecked =
               GlobalValues.session.getBool('check') ?? false;
-
           // Si el Checkbox está marcado, actualiza la sesión
           if (isCheckboxChecked) {
             setState(() {
               GlobalValues.session.setBool('session', true);
             });
           }
-
           Navigator.pushReplacementNamed(context, '/inicio');
-        } catch (error) {
-          // Manejar errores de autenticación
-          print("Error de autenticación: $error");
+        } catch (e) {
+          print("Error durante la autenticación con GitHub en Firebase: $e");
+          // Trata el error según tus necesidades
         }
 
         break;
-
       case GitHubSignInResultStatus.cancelled:
         showDialog(
           context: context,
@@ -465,10 +487,21 @@ class _LoginScreenState extends State<LoginScreen> {
         border: OutlineInputBorder(),
         labelText: label,
         filled: true,
-        fillColor: Colors.white,
+        fillColor: GlobalValues.flagTheme.value
+            ? Colors.black // Color del texto del label en modo oscuro
+            : Colors.white,
         contentPadding: EdgeInsets.symmetric(vertical: 15),
-        alignLabelWithHint:
-            true, // Alinea el texto del placeholder con el texto ingresado
+        alignLabelWithHint: true,
+        labelStyle: TextStyle(
+          color: GlobalValues.flagTheme.value
+              ? Colors.white // Color del texto del label en modo oscuro
+              : Colors.black, // Color del texto del label en modo claro
+        ),
+      ),
+      style: TextStyle(
+        color: GlobalValues.flagTheme.value
+            ? Colors.white // Color del texto ingresado en modo oscuro
+            : Colors.black, // Color del texto ingresado en modo claro
       ),
       controller: controller,
     );

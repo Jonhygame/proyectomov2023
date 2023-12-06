@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/firebase/email_auth.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
@@ -48,15 +49,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Registro'),
-          backgroundColor: Color.fromARGB(255, 31, 166, 187),
+          title: Text(
+            'Registro',
+            style: TextStyle(
+              color: GlobalValues.flagTheme.value
+                  ? Colors.white // Texto en modo oscuro
+                  : Colors.white, // Texto en modo claro
+            ),
+          ),
+          backgroundColor: GlobalValues.flagTheme.value
+              ? Color.fromARGB(255, 34, 118, 254)
+              : Color.fromARGB(255, 31, 166, 187),
         ),
         body: Stack(
           children: [
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/Fondo.jpg'),
+                  image: AssetImage(
+                    GlobalValues.flagTheme.value
+                        ? 'assets/images/FondoNegro.jpg'
+                        : 'assets/images/Fondo.jpg',
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -105,7 +119,9 @@ class RegisterForm extends StatelessWidget {
         padding: const EdgeInsets.all(30),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: Color.fromARGB(255, 31, 166, 187),
+          color: GlobalValues.flagTheme.value
+              ? Color.fromARGB(255, 254, 133, 34)
+              : Color.fromARGB(255, 31, 166, 187),
         ),
         child: Column(
           children: [
@@ -163,7 +179,10 @@ class PasswordTextField extends StatelessWidget {
         border: OutlineInputBorder(),
         labelText: 'Password',
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Colors.black,
+        labelStyle: TextStyle(
+            color: Colors.white // Color del texto del label en modo claro
+            ),
       ),
       controller: conPassUser,
       obscureText: true,
@@ -205,7 +224,8 @@ class NameTextField extends StatelessWidget {
         border: OutlineInputBorder(),
         labelText: 'Nombre',
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Colors.black,
+        labelStyle: TextStyle(color: Colors.white),
       ),
       controller: conName,
     );
@@ -219,12 +239,15 @@ class EmailTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Accede al tema desde GlobalValues
+
     return TextFormField(
       decoration: const InputDecoration(
         border: OutlineInputBorder(),
         labelText: 'Email',
         filled: true,
-        fillColor: Colors.white,
+        fillColor: Colors.black,
+        labelStyle: TextStyle(color: Colors.white),
       ),
       controller: conEmailUser,
     );
