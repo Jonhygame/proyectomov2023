@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:proyectomov2023/database/database.dart';
+import 'package:proyectomov2023/firebase/laboratorio_firebase.dart';
 
 class AddLaboratorio extends StatefulWidget {
+  AddLaboratorio({super.key, this.id_lab});
+  String? id_lab;
   @override
   _AddLaboratorioState createState() => _AddLaboratorioState();
 }
@@ -9,9 +12,10 @@ class AddLaboratorio extends StatefulWidget {
 class _AddLaboratorioState extends State<AddLaboratorio> {
   final _formKey = GlobalKey<FormState>();
   final _nombreController = TextEditingController();
+  LaboratoriosFirebase? _laboratoriosFirebase;
+  late int pc = 0;
   @override
   void dispose() {
-    _nombreController.dispose();
     super.dispose();
   }
 
@@ -19,6 +23,15 @@ class _AddLaboratorioState extends State<AddLaboratorio> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    _laboratoriosFirebase = LaboratoriosFirebase();
+    if (widget.id_lab != null) {
+      var data = _laboratoriosFirebase!
+          .obtenerDatosDocumento(widget.id_lab.toString());
+      data.then((value) {
+        _nombreController.text = value.entries.first.value;
+        pc = value.entries.last.value;
+      }); //importante
+    }
   }
 
   void _guardarLaboratorio() {
@@ -26,19 +39,17 @@ class _AddLaboratorioState extends State<AddLaboratorio> {
       String nombre = _nombreController.text;
 
       // Guardar en la base de datos
-      Data().INSERT('Laboratorios', {'Nombre': nombre}).then((value) {
-        var msj = (value > 0) ? 'La inserción fue exitosa' : 'Ocurrió un error';
-        var snackbar = SnackBar(content: Text(msj));
-        ScaffoldMessenger.of(context).showSnackBar(snackbar);
-        Navigator.pop(context);
-      });
-      // Mostrar mensaje de éxito
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Laboratorio guardado')),
-      );
-
-      // Limpiar el formulario
-      _nombreController.clear();
+      if (widget.id_lab == null) {
+        _laboratoriosFirebase!
+            .insLaboratorios({"Nombre": nombre, "pc": 0}).then(
+                (value) => ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Laboratorio guardado')),
+                    ));
+      } else {
+        _laboratoriosFirebase!
+            .updLaboratorio({"Nombre": nombre, "pc": pc}, widget.id_lab);
+      }
+      Navigator.pop(context);
     }
   }
 
@@ -46,7 +57,10 @@ class _AddLaboratorioState extends State<AddLaboratorio> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Agregar Laboratorio'),
+        title: widget.id_lab == null
+            ? Text('Agregar Laboratorio')
+            : Text('Editar Laboratorio'),
+        backgroundColor: Colors.blueGrey,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),

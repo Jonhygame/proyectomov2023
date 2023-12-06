@@ -1,8 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
-import 'package:proyectomov2023/database/database.dart';
-import 'package:proyectomov2023/models/laboratorios_model.dart';
+import 'package:proyectomov2023/firebase/laboratorio_firebase.dart';
 import 'package:proyectomov2023/screens/dashboard_screen.dart';
 import 'package:proyectomov2023/screens/settings_screen.dart';
 import 'package:proyectomov2023/widgets/CardLaboratiorioWidget.dart';
@@ -15,14 +15,12 @@ class InicioScreen extends StatefulWidget {
 }
 
 class _InicioScreenState extends State<InicioScreen> {
-  Data? data;
-  String searchTerm = '';
-  int? selectedTaskStatus;
+  LaboratoriosFirebase? _laboratoriosFirebase;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    data = Data();
+    _laboratoriosFirebase = LaboratoriosFirebase();
   }
 
   @override
@@ -42,35 +40,14 @@ class _InicioScreenState extends State<InicioScreen> {
               onPressed: () => Navigator.pushNamedAndRemoveUntil(
                     context,
                     '/addLab',
-                    (route) => false,
+                    (route) => true,
                   ).then((value) {
                     setState(() {
                       // Puedes realizar acciones después de que se complete la navegación
                     });
                   }),
-              icon: const Icon(Icons.task)),
+              icon: const Icon(Icons.add)),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      searchTerm = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Buscar Laboratorio...',
-                  ),
-                ),
-                SizedBox(height: 5.0),
-              ],
-            ),
-          ),
-        ),
       ),
       bottomNavigationBar: CurvedNavigationBar(
           height: 55,
@@ -143,16 +120,19 @@ class _InicioScreenState extends State<InicioScreen> {
       body: ValueListenableBuilder(
         valueListenable: GlobalValues.flagPR4Task,
         builder: (context, value, _) {
-          return FutureBuilder(
-              future: data!.searchLab(searchTerm),
+          return StreamBuilder(
+              stream: _laboratoriosFirebase!.getAllLaboratorios(),
               builder: (BuildContext context,
-                  AsyncSnapshot<List<LaboratorioModel>> snapshot) {
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasData) {
                   return ListView.builder(
-                    itemCount: snapshot.data!.length,
+                    itemCount: snapshot.data!.docs.length,
                     itemBuilder: (BuildContext context, int index) {
+                      //print(snapshot.data!.docs[index]);
+                      //return Text('a');
                       return CardLaboratorioWidget(
-                          laboratorioModel: snapshot.data![index], data: data);
+                          laboratorio: snapshot.data!.docs[index],
+                          index: index + 1);
                     },
                   );
                 } else {
