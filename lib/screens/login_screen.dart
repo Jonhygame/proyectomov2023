@@ -47,7 +47,6 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: GlobalValues.flagTheme.value
               ? Color.fromARGB(255, 34, 118, 254)
               : Color.fromARGB(255, 31, 166, 187),
-          // Agrega más configuraciones de AppBar según tus necesidades
         ),
         body: Stack(
           children: [
