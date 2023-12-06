@@ -7,7 +7,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:octo_image/octo_image.dart';
+import 'package:provider/provider.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
+import 'package:proyectomov2023/assets/theme_provider.dart';
 import 'package:proyectomov2023/screens/dashboard_screen.dart';
 import 'package:proyectomov2023/screens/inicio_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -28,6 +30,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   late String userId; // Agrega esta línea para definir userId
   File? imagen_to_upload;
+  // Obtén el ThemeProvider del contexto
 
   @override
   void initState() {
@@ -48,8 +51,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Ajustes'),
-          backgroundColor: Color.fromARGB(255, 31, 166, 187),
+          title: Text(
+            'Ajustes',
+            style: TextStyle(
+              color: GlobalValues.flagTheme.value
+                  ? Colors.white // Texto en modo oscuro
+                  : Colors.white, // Texto en modo claro
+            ),
+          ),
+          backgroundColor: GlobalValues.flagTheme.value
+              ? Color.fromARGB(255, 34, 118, 254)
+              : Color.fromARGB(255, 31, 166, 187),
         ),
         bottomNavigationBar: CurvedNavigationBar(
             height: 55,
@@ -126,7 +138,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage('assets/images/Fondo.jpg'),
+                  image: AssetImage(
+                    GlobalValues.flagTheme.value
+                        ? 'assets/images/FondoNegro.jpg'
+                        : 'assets/images/Fondo.jpg',
+                  ),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -138,7 +154,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  color: Color.fromARGB(255, 31, 166, 187),
+                  color: GlobalValues.flagTheme.value
+                      ? Color.fromARGB(255, 254, 133, 34)
+                      : Color.fromARGB(255, 31, 166, 187),
                 ),
                 child: Center(
                   child: Column(
