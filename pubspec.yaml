@@ -33,6 +33,7 @@ dependencies:
   sign_in_button: ^3.0.0
   github_sign_in_plus: ^0.0.1
   octo_image: ^2.0.0
+  image_picker: ^0.8.4
 
 dev_dependencies:
   flutter_test:

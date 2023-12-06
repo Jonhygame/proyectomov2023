@@ -274,14 +274,6 @@ class _LoginScreenState extends State<LoginScreen> {
     switch (result.status) {
       case GitHubSignInResultStatus.ok:
         try {
-          String githubToken = result.token ?? "";
-
-          // Autenticar en Firebase con GitHub
-          AuthCredential credential =
-              GithubAuthProvider.credential(githubToken);
-          UserCredential userCredential =
-              await FirebaseAuth.instance.signInWithCredential(credential);
-
           // Verifica si el Checkbox está marcado
           bool isCheckboxChecked =
               GlobalValues.session.getBool('check') ?? false;
@@ -300,7 +292,6 @@ class _LoginScreenState extends State<LoginScreen> {
         }
 
         break;
-
       case GitHubSignInResultStatus.cancelled:
         showDialog(
           context: context,
