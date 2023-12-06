@@ -1,26 +1,44 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 
-class FavoritesFirebase {
+class LaboratoriosFirebase {
   FirebaseFirestore _firebase = FirebaseFirestore.instance;
-  CollectionReference? _favoritesColletion;
+  CollectionReference? _laboratoriosColletion;
 
-  FavoritesFirebase() {
-    _favoritesColletion = _firebase.collection('favorites');
+  LaboratoriosFirebase() {
+    _laboratoriosColletion = _firebase.collection('Laboratorios');
   }
-  Future<void> insFavorites(Map<String, dynamic> map) async {
-    return _favoritesColletion!.doc().set(map);
-  }
-
-  Future<void> updFavorite(Map<String, dynamic> map, String id) async {
-    return _favoritesColletion!.doc(id).update(map);
+  Future<void> insLaboratorios(Map<String, dynamic> map) async {
+    return _laboratoriosColletion!.doc().set(map);
   }
 
-  Future<void> delFavorite(String id) async {
-    return _favoritesColletion!.doc(id).delete();
+  Future<void> updLaboratorio(Map<String, dynamic> map, String? id) async {
+    return _laboratoriosColletion!.doc(id).update(map);
   }
 
-  Stream<QuerySnapshot> getAllFavorites() {
-    return _favoritesColletion!.snapshots();
+  Future<void> delLaboratorio(String id) async {
+    return _laboratoriosColletion!.doc(id).delete();
+  }
+
+  Stream<QuerySnapshot> getAllLaboratorios() {
+    return _laboratoriosColletion!.snapshots();
+  }
+
+  Future<Map<String, dynamic>> obtenerDatosDocumento(String id) async {
+    // Referencia al documento específico
+    DocumentReference documentReference =
+        FirebaseFirestore.instance.collection('Laboratorios').doc(id);
+    // Obtener el snapshot del documento
+    DocumentSnapshot<Object?> snapshot = await documentReference.get();
+    // Verificar si el documento existe
+    if (snapshot.exists) {
+      // Acceder a los datos del documento
+      Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+      // Hacer algo con los datos
+      //print(data);
+      return data;
+    } else {
+      //print('El documento no existe.');
+      return {"error": "error"};
+    }
   }
 }

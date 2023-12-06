@@ -1,12 +1,16 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/database/database.dart';
-import 'package:proyectomov2023/models/equipo_model.dart';
-import 'package:proyectomov2023/models/equiposProyectores_model.dart';
+import 'package:proyectomov2023/firebase/Equipos_firebase.dart';
+import 'package:proyectomov2023/firebase/laboratorio_firebase.dart';
+import 'package:proyectomov2023/screens/add_Equipos.dart';
+import 'package:proyectomov2023/widgets/CardEquiposWidget.dart';
 
 class ListarEquipoScreen extends StatefulWidget {
-  const ListarEquipoScreen({super.key});
-
+  ListarEquipoScreen({super.key, required this.lab, required this.nom});
+  String lab;
+  String nom;
   @override
   State<ListarEquipoScreen> createState() => _ListarEquipoScreenState();
 }
@@ -15,22 +19,22 @@ class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
   Data? data;
   String searchTerm = '';
   int? selectedTaskStatus;
+  EquiposFirebase? _equiposFirebase;
+  LaboratoriosFirebase? _laboratoriosFirebase;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    data = Data();
+    _equiposFirebase = EquiposFirebase();
+    _laboratoriosFirebase = LaboratoriosFirebase();
   }
 
   @override
   Widget build(BuildContext context) {
-    final datos =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Laboratorio ' + datos['id'].toString(),
+          'Laboratorio ' + widget.nom,
           style: const TextStyle(
             color: Colors.white,
           ),
@@ -38,48 +42,36 @@ class _ListarEquipoScreenState extends State<ListarEquipoScreen> {
         backgroundColor: Colors.blueGrey,
         actions: [
           IconButton(
+              onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => addEquipo(
+                            id: widget.lab,
+                          ))),
+              icon: const Icon(Icons.computer)),
+          IconButton(
               onPressed: () =>
-                  Navigator.pushNamed(context, '/selectDisp').then((value) {
+                  Navigator.pushNamed(context, '/selectAddSpec').then((value) {
                     setState(() {});
                   }),
-              icon: const Icon(Icons.task)),
+              icon: const Icon(Icons.add)),
         ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(50.0),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                TextField(
-                  onChanged: (value) {
-                    setState(() {
-                      value = value;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Buscar Laboratorio...',
-                  ),
-                ),
-                SizedBox(height: 5.0),
-              ],
-            ),
-          ),
-        ),
       ),
       body: ValueListenableBuilder(
         valueListenable: GlobalValues.flagPR4Task,
         builder: (context, value, _) {
           return FutureBuilder(
-              future: data!.searchEquipo(datos['id'], searchTerm),
+              future: _equiposFirebase!.getspecific(widget.lab),
               builder: (BuildContext context,
-                  AsyncSnapshot<List<EquipoModel>> snapshot) {
-                print(snapshot);
+                  AsyncSnapshot<QuerySnapshot<Object?>> snapshot) {
                 if (snapshot.hasData) {
                   return ListView.builder(
-                    itemCount: snapshot.data!.length,
+                    itemCount: snapshot.data!.docs.length,
                     itemBuilder: (BuildContext context, int index) {
-                      //return CardLaboratorioWidget(laboratorioModel: snapshot.data![index], data: data);
-                      return Text('a');
+                      //print(snapshot.data!.docs[index].data());
+                      //return Text('a');
+                      return CardEquipoWidget(
+                          equipo: snapshot.data!.docs[index], index: index + 1);
                     },
                   );
                 } else {

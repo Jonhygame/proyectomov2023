@@ -1,27 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:proyectomov2023/firebase/Equipos_firebase.dart';
 import 'package:proyectomov2023/firebase/laboratorio_firebase.dart';
 import 'package:proyectomov2023/screens/add_laboratorios.dart';
-import 'package:proyectomov2023/screens/listarEquipos_screen.dart';
 
-class CardLaboratorioWidget extends StatefulWidget {
-  CardLaboratorioWidget(
-      {super.key, required this.laboratorio, required this.index});
-  QueryDocumentSnapshot? laboratorio;
+class CardEquipoWidget extends StatefulWidget {
+  CardEquipoWidget({super.key, required this.equipo, required this.index});
+  QueryDocumentSnapshot equipo;
   int index;
 
   @override
-  State<CardLaboratorioWidget> createState() => _CardLaboratorioWidgetState();
+  State<CardEquipoWidget> createState() => _CardEquipoWidgetState();
 }
 
-class _CardLaboratorioWidgetState extends State<CardLaboratorioWidget> {
+class _CardEquipoWidgetState extends State<CardEquipoWidget> {
   LaboratoriosFirebase? _laboratoriosFirebase;
+  EquiposFirebase? _equiposFirebase;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _laboratoriosFirebase = LaboratoriosFirebase();
+    _equiposFirebase = EquiposFirebase();
   }
 
   bool estado = false;
@@ -32,7 +33,7 @@ class _CardLaboratorioWidgetState extends State<CardLaboratorioWidget> {
           context,
           MaterialPageRoute(
               builder: (context) => AddLaboratorio(
-                    id_lab: widget.laboratorio!.id,
+                    id_lab: widget.equipo.id,
                   ))),
       child: Container(
         margin: EdgeInsets.all(10),
@@ -42,14 +43,15 @@ class _CardLaboratorioWidgetState extends State<CardLaboratorioWidget> {
         ),
         child: ListTile(
           title: Text(
-            widget.index.toString() + " " + widget.laboratorio!.get('Nombre'),
+            widget.index.toString() + " " + widget.equipo.get('Nombre'),
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
             ),
           ),
           subtitle: Text(
-            widget.laboratorio!.get('pc').toString(),
+            "2",
+            //widget.equipo.get('pc').toString(),
             //_equiposFirebase!.getEquipo(widget.laboratorio.id),
             style: TextStyle(
               fontSize: 15,
@@ -80,32 +82,12 @@ class _CardLaboratorioWidgetState extends State<CardLaboratorioWidget> {
                       builder: (context) {
                         return AlertDialog(
                           title: Text('Mensaje del sistema'),
-                          content: Text('¿Deseas borrar el Laboratorio?'),
+                          content: Text('¿Deseas borrar el Equipo?'),
                           actions: [
                             TextButton(
                                 onPressed: () {
-                                  if (widget.laboratorio!.get('pc') != 0) {
-                                    Navigator.pop(context);
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return AlertDialog(
-                                            title: Text('Alerta'),
-                                            content:
-                                                Text('Computadoras Asignadas'),
-                                            actions: [
-                                              TextButton(
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
-                                                  child: Text('Entendido')),
-                                            ],
-                                          );
-                                        });
-                                  } else {
-                                    _laboratoriosFirebase!
-                                        .delLaboratorio(widget.laboratorio!.id);
-                                    Navigator.pop(context);
-                                  }
+                                  _equiposFirebase!.delEquipo(widget.equipo.id);
+                                  Navigator.pop(context);
                                 },
                                 child: Text('Si')),
                             TextButton(
@@ -120,12 +102,8 @@ class _CardLaboratorioWidgetState extends State<CardLaboratorioWidget> {
                 ),
                 IconButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ListarEquipoScreen(
-                                lab: widget.laboratorio!.id,
-                                nom: widget.laboratorio!.get('Nombre'))));
+                    Navigator.pushNamed(context, '/listarEquipos',
+                        arguments: {'id': widget.equipo.id});
                   },
                   icon: Icon(
                     Icons.arrow_right_sharp,
