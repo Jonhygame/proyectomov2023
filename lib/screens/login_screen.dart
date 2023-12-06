@@ -257,12 +257,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> createUserInFirebase(
-      UserCredential userCredential, String loginMethod) async {
+      UserCredential? userCredential, String loginMethod) async {
     try {
+      // Verifica si userCredential es nulo
+      if (userCredential == null || userCredential.user == null) {
+        print('Error: userCredential o user nulos.');
+        return;
+      }
+
       // Obtener datos del usuario
-      var user = userCredential.user;
-      var email = user!.email;
+      var user = userCredential.user!;
+      var email = user.email;
       var photoUrl = user.photoURL;
+
+      // Verifica si email es nulo
+      if (email == null) {
+        print('Error: email nulo.');
+        return;
+      }
 
       // Crear usuario en Firestore
       await _firestore.collection('users').doc(user.uid).set({
@@ -289,21 +301,29 @@ class _LoginScreenState extends State<LoginScreen> {
     switch (result.status) {
       case GitHubSignInResultStatus.ok:
         try {
+          String githubToken = result.token ?? "";
+          // Autenticar en Firebase con GitHub
+          AuthCredential credential =
+              GithubAuthProvider.credential(githubToken);
+          UserCredential userCredential =
+              await FirebaseAuth.instance.signInWithCredential(credential);
+
+          // Crear usuario en Firebase (si no existe)
+          await createUserInFirebase(userCredential, 'GitHub');
+
           // Verifica si el Checkbox está marcado
           bool isCheckboxChecked =
               GlobalValues.session.getBool('check') ?? false;
-
           // Si el Checkbox está marcado, actualiza la sesión
           if (isCheckboxChecked) {
             setState(() {
               GlobalValues.session.setBool('session', true);
             });
           }
-
           Navigator.pushReplacementNamed(context, '/inicio');
-        } catch (error) {
-          // Manejar errores de autenticación
-          print("Error de autenticación: $error");
+        } catch (e) {
+          print("Error durante la autenticación con GitHub en Firebase: $e");
+          // Trata el error según tus necesidades
         }
 
         break;
