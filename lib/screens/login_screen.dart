@@ -7,6 +7,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/firebase/email_auth.dart';
 import 'package:sign_in_button/sign_in_button.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -202,10 +203,80 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (isCheckboxChecked()) {}
               },
             ),
+            SignInButton(
+              Buttons.facebook,
+              text: 'Inicia Sesión con Facebook',
+              onPressed: () {
+                signInWithFacebook();
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  // Nueva función para el inicio de sesión con Facebook
+  Future<void> signInWithFacebook() async {
+    try {
+      // Realiza la autenticación con Facebook
+      final LoginResult loginResult = await FacebookAuth.instance.login();
+
+      // Verifica si la autenticación fue exitosa
+      if (loginResult.status == LoginStatus.success) {
+        // Obtiene el token de acceso
+        final AccessToken accessToken = loginResult.accessToken!;
+
+        // Autenticar en Firebase con Facebook
+        final AuthCredential credential =
+            FacebookAuthProvider.credential(accessToken.token);
+        final UserCredential userCredential =
+            await FirebaseAuth.instance.signInWithCredential(credential);
+
+        // Crear usuario en Firebase (si no existe)
+        await createUserInFirebase(userCredential, 'Facebook');
+
+        // Verifica si el Checkbox está marcado
+        bool isCheckboxChecked = GlobalValues.session.getBool('check') ?? false;
+
+        // Si el Checkbox está marcado, actualiza la sesión
+        if (isCheckboxChecked) {
+          setState(() {
+            GlobalValues.session.setBool('session', true);
+          });
+        }
+
+        // Redirige a la pantalla de inicio
+        Navigator.pushReplacementNamed(context, '/inicio');
+      } else {
+        // Muestra un mensaje de error
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error de autenticación'),
+              content: Text(
+                  'Ocurrió un error durante la autenticación con Facebook.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'OK',
+                    style: TextStyle(
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      print('Error durante la autenticación con Facebook: $e');
+    }
   }
 
   Future<UserCredential?> signInWithGoogle() async {

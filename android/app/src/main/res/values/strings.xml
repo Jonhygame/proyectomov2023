@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">proyectomov2023</string>
+    <string name="facebook_app_id">336988219064133</string>
+    <string name="fb_login_protocol_scheme">fb336988219064133</string>
+    <string name="facebook_client_token">81ac54369be196d19bd7569b74a07a28</string>
+</resources>

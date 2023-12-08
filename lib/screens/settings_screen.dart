@@ -133,9 +133,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ]),
         body: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 100.0),
-            ),
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
@@ -150,7 +147,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             SingleChildScrollView(
               child: Container(
-                height: 500,
                 margin: const EdgeInsets.symmetric(horizontal: 30),
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
@@ -162,101 +158,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Center(
                   child: Column(
                     children: [
-                      imagen_to_upload != null
-                          ? _buildUserImageWidget(imagen_to_upload)
-                          : _buildUserInfo(),
-                      const Text(
-                        'Cambiar Tema',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20, right: 20),
-                        child: DayNightSwitcher(
-                          isDarkModeEnabled: GlobalValues.flagTheme.value,
-                          onStateChanged: (isDarkModeEnabled) {
-                            setState(() {
-                              GlobalValues.teme
-                                  .setBool('teme', isDarkModeEnabled);
-                              GlobalValues.flagTheme.value = isDarkModeEnabled;
-                            });
-                          },
-                        ),
-                      ),
+                      _buildUserInfo(),
                       const SizedBox(height: 20),
-                      FutureBuilder<bool>(
-                        future: _checkUserMethod(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            bool isUserMethodCorreo = snapshot.data ?? false;
-                            // Mostrar el botón solo si el método es 'Correo'
-                            return isUserMethodCorreo
-                                ? FloatingActionButton.extended(
-                                    backgroundColor: Colors.white,
-                                    label: Text(
-                                      'Cambiar Imagen',
-                                      style: TextStyle(color: Colors.black),
-                                    ),
-                                    onPressed: () async {
-                                      final XFile? imagen = await getImage();
-                                      setState(() {
-                                        imagen_to_upload = File(imagen!.path);
-                                      });
-                                      if (imagen_to_upload == null) {
-                                        return;
-                                      }
-                                      final updloaded =
-                                          await uploadImage(imagen_to_upload!);
-
-                                      String? newPhotoUrl =
-                                          await uploadImage(imagen_to_upload!);
-
-                                      if (newPhotoUrl != null) {
-                                        imagen_to_upload = null;
-                                        // Actualizar la URL de la foto en Firestore
-                                        await updatePhotoUrl(
-                                            user?.uid, newPhotoUrl);
-
-                                        setState(() {
-                                          // Actualizar la UI con la nueva foto
-                                        });
-                                      }
-                                    },
-                                  )
-                                : Container(); // Ocultar el botón si el método no es 'Correo'
-                          } else {
-                            return CircularProgressIndicator();
-                          }
-                        },
-                      ),
+                      _buildThemeSwitcher(),
                       const SizedBox(height: 20),
-                      FloatingActionButton.extended(
-                        backgroundColor: Colors.purple,
-                        label: Text('Cambiar Contraseña'),
-                        onPressed: () {
-                          _showResetPasswordDialog(context);
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                      FloatingActionButton.extended(
-                        icon: Icon(Icons.logout),
-                        backgroundColor: Colors.red,
-                        label: Text('Cerrar Sesión'),
-                        onPressed: () async {
-                          // Cerrar sesión de Google
-                          await _handleSignOut();
-
-                          setState(() {
-                            GlobalValues.session.setBool('session', false);
-                          });
-                          Navigator.pushNamedAndRemoveUntil(
-                            context,
-                            '/login',
-                            (route) =>
-                                false, // Elimina todas las rutas anteriores
-                          );
-                        },
-                      )
+                      _buildLogoutButton(),
                     ],
                   ),
                 ),
@@ -265,6 +171,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildThemeSwitcher() {
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, right: 20),
+      child: DayNightSwitcher(
+        isDarkModeEnabled: GlobalValues.flagTheme.value,
+        onStateChanged: (isDarkModeEnabled) {
+          setState(() {
+            GlobalValues.teme.setBool('teme', isDarkModeEnabled);
+            GlobalValues.flagTheme.value = isDarkModeEnabled;
+          });
+        },
+      ),
+    );
+  }
+
+  Widget _buildLogoutButton() {
+    return FloatingActionButton.extended(
+      icon: Icon(Icons.logout),
+      backgroundColor: Colors.red,
+      label: Text('Cerrar Sesión'),
+      onPressed: () async {
+        await _handleSignOut();
+
+        setState(() {
+          GlobalValues.session.setBool('session', false);
+        });
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/login',
+          (route) => false,
+        );
+      },
     );
   }
 
@@ -449,34 +390,136 @@ class _SettingsScreenState extends State<SettingsScreen> {
         if (snapshot.connectionState == ConnectionState.done) {
           var photoUrl = snapshot.data ?? user?.photoURL;
 
-          return Column(
-            children: [
-              SizedBox(
-                height: 100,
-                child: OctoImage.fromSet(
-                  image: CachedNetworkImageProvider(photoUrl ?? ''),
-                  octoSet: OctoSet.circleAvatar(
-                    backgroundColor: Colors.transparent,
-                    text: Text(
-                      displayName?.isNotEmpty == true
-                          ? displayName![0]
-                          : email?.isNotEmpty == true
-                              ? email![0]
-                              : '',
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                displayName ?? email ?? '',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          // Verificar si el método de inicio de sesión es 'Correo'
+          Future<bool> isUserMethodCorreo() async {
+            try {
+              var snapshot = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(user?.uid)
+                  .get();
+
+              if (snapshot.exists) {
+                var userData = snapshot.data() as Map<String, dynamic>;
+                var userMethod = userData['metodo'];
+                return userMethod == 'Correo';
+              }
+            } catch (e) {
+              print('Error al verificar el método del usuario: $e');
+            }
+            return false; // Valor predeterminado si hay un error
+          }
+
+          return FutureBuilder<bool>(
+            future: isUserMethodCorreo(),
+            builder: (context, isUserMethodSnapshot) {
+              if (isUserMethodSnapshot.connectionState ==
+                  ConnectionState.done) {
+                bool isUserMethodCorreo = isUserMethodSnapshot.data ?? false;
+
+                if (isUserMethodCorreo) {
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: 100,
+                        child: OctoImage.fromSet(
+                          image: CachedNetworkImageProvider(photoUrl ?? ''),
+                          octoSet: OctoSet.circleAvatar(
+                            backgroundColor: Colors.transparent,
+                            text: Text(
+                              displayName?.isNotEmpty == true
+                                  ? displayName![0]
+                                  : email?.isNotEmpty == true
+                                      ? email![0]
+                                      : '',
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        displayName ?? email ?? '',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      FloatingActionButton.extended(
+                        backgroundColor: Colors.white,
+                        label: Text(
+                          'Cambiar Imagen',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        onPressed: () async {
+                          final XFile? imagen = await getImage();
+                          setState(() {
+                            imagen_to_upload = File(imagen!.path);
+                          });
+                          if (imagen_to_upload == null) {
+                            return;
+                          }
+                          final uploaded = await uploadImage(imagen_to_upload!);
+
+                          String? newPhotoUrl =
+                              await uploadImage(imagen_to_upload!);
+
+                          if (newPhotoUrl != null) {
+                            imagen_to_upload = null;
+                            // Actualizar la URL de la foto en Firestore
+                            await updatePhotoUrl(user?.uid, newPhotoUrl);
+
+                            setState(() {
+                              // Actualizar la UI con la nueva foto
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      FloatingActionButton.extended(
+                        backgroundColor: Colors.purple,
+                        label: Text('Cambiar Contraseña'),
+                        onPressed: () {
+                          _showResetPasswordDialog(context);
+                        },
+                      ),
+                    ],
+                  );
+                } else {
+                  return Column(
+                    children: [
+                      SizedBox(
+                        height: 100,
+                        child: OctoImage.fromSet(
+                          image: CachedNetworkImageProvider(photoUrl ?? ''),
+                          octoSet: OctoSet.circleAvatar(
+                            backgroundColor: Colors.transparent,
+                            text: Text(
+                              displayName?.isNotEmpty == true
+                                  ? displayName![0]
+                                  : email?.isNotEmpty == true
+                                      ? email![0]
+                                      : '',
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        displayName ?? email ?? '',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ); // No mostrar los botones si el método no es 'Correo'
+                }
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
           );
         } else {
           // Puedes mostrar un indicador de carga mientras se recupera la URL de la foto
