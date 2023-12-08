@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/firebase/Equipos_firebase.dart';
 import 'package:proyectomov2023/firebase/laboratorio_firebase.dart';
 import 'package:proyectomov2023/screens/add_laboratorios.dart';
@@ -89,10 +90,16 @@ class _CardEquipoWidgetState extends State<CardEquipoWidget> {
                                   _equiposFirebase!.delEquipo(widget.equipo.id);
                                   Navigator.pop(context);
                                 },
-                                child: Text('Si')),
+                                child: Text('Si',
+                                    style: GlobalValues.flagTheme.value
+                                        ? TextStyle(color: Colors.white)
+                                        : TextStyle(color: Colors.black))),
                             TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: Text('No')),
+                                child: Text('No',
+                                    style: GlobalValues.flagTheme.value
+                                        ? TextStyle(color: Colors.white)
+                                        : TextStyle(color: Colors.black))),
                           ],
                         );
                       },
@@ -101,10 +108,7 @@ class _CardEquipoWidgetState extends State<CardEquipoWidget> {
                   icon: Icon(Icons.delete),
                 ),
                 IconButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/listarEquipos',
-                        arguments: {'id': widget.equipo.id});
-                  },
+                  onPressed: () {},
                   icon: Icon(
                     Icons.arrow_right_sharp,
                     size: 32,

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/firebase/laboratorio_firebase.dart';
 import 'package:proyectomov2023/screens/add_laboratorios.dart';
 import 'package:proyectomov2023/screens/listarEquipos_screen.dart';
@@ -107,10 +108,16 @@ class _CardLaboratorioWidgetState extends State<CardLaboratorioWidget> {
                                     Navigator.pop(context);
                                   }
                                 },
-                                child: Text('Si')),
+                                child: Text('Si',
+                                    style: GlobalValues.flagTheme.value
+                                        ? TextStyle(color: Colors.white)
+                                        : TextStyle(color: Colors.black))),
                             TextButton(
                                 onPressed: () => Navigator.pop(context),
-                                child: Text('No')),
+                                child: Text('No',
+                                    style: GlobalValues.flagTheme.value
+                                        ? TextStyle(color: Colors.white)
+                                        : TextStyle(color: Colors.black))),
                           ],
                         );
                       },

@@ -4,7 +4,7 @@ import 'package:proyectomov2023/firebase/Equipos_firebase.dart';
 import 'package:proyectomov2023/firebase/discos_firebase.dart';
 
 class addEquipo extends StatefulWidget {
-  const addEquipo({super.key, this.id});
+  addEquipo({super.key, this.id});
   String? id;
   @override
   _addEquipoState createState() => _addEquipoState();
