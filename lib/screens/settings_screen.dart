@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:day_night_switcher/day_night_switcher.dart';
@@ -453,7 +454,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SizedBox(
                 height: 100,
                 child: OctoImage.fromSet(
-                  image: NetworkImage(photoUrl ?? ''),
+                  image: CachedNetworkImageProvider(photoUrl ?? ''),
                   octoSet: OctoSet.circleAvatar(
                     backgroundColor: Colors.transparent,
                     text: Text(
