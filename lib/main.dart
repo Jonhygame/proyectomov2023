@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/assets/styles_app.dart';
 import 'package:proyectomov2023/routes.dart';
+import 'package:proyectomov2023/screens/information_screen.dart';
 import 'package:proyectomov2023/screens/inicio_screen.dart';
 import 'package:proyectomov2023/screens/login_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -106,7 +107,7 @@ class _MyAppState extends State<MyApp> {
 
         // Redirigir a la pantalla correspondiente
         Widget initialScreen =
-            isSessionActive ? const InicioScreen() : const LoginScreen();
+            isSessionActive ? const InicioScreen() : InformationScreen();
 
         return MaterialApp(
           home: initialScreen,

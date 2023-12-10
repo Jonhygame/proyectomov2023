@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:github_sign_in_plus/github_sign_in_plus.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:proyectomov2023/assets/global_values.dart';
 import 'package:proyectomov2023/firebase/email_auth.dart';
@@ -39,10 +40,12 @@ class _LoginScreenState extends State<LoginScreen> {
         appBar: AppBar(
           title: Text(
             'Inicio de sesión',
-            style: TextStyle(
-              color: GlobalValues.flagTheme.value
-                  ? Colors.white // Texto en modo oscuro
-                  : Colors.white, // Texto en modo claro
+            style: GoogleFonts.openSans(
+              textStyle: TextStyle(
+                color: GlobalValues.flagTheme.value
+                    ? Colors.white // Texto en modo oscuro
+                    : Colors.white, // Texto en modo claro
+              ),
             ),
           ),
           backgroundColor: GlobalValues.flagTheme.value
@@ -113,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text(
                     'Registrate aquí',
-                    style: TextStyle(
+                    style: GoogleFonts.assistant(
                       color: Colors.white,
                       decoration: TextDecoration.underline,
                     ),
@@ -125,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text(
                     '¿Olvidaste tu contraseña?',
-                    style: TextStyle(
+                    style: GoogleFonts.assistant(
                       color: Colors.white,
                       decoration: TextDecoration.underline,
                     ),
@@ -147,7 +150,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 });
               },
             ),
-            const Text("Guardar Sesión"),
+            Text(
+              "Guardar Sesión",
+              style: GoogleFonts.assistant(
+                color: Colors.white,
+              ),
+            ),
             SignInButton(
               Buttons.google,
               text: "Inicia Sesión con Google",
@@ -174,17 +182,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: Text('Un error ha ocurrido'),
-                        content: Text('Error de autenticación con Google'),
+                        title: Text(
+                          'Un error ha ocurrido',
+                          style: GoogleFonts.comicNeue(color: Colors.white),
+                        ),
+                        content: Text(
+                          'Error de autenticación con Google',
+                          style: GoogleFonts.comicNeue(color: Colors.white),
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () {
                               Navigator.pop(context);
                             },
-                            child: const Text(
+                            child: Text(
                               'OK',
-                              style: TextStyle(
-                                color: Colors.black, // Cambia el color a negro
+                              style: GoogleFonts.paprika(
+                                color: GlobalValues.flagTheme.value
+                                    ? Colors.white
+                                    : Colors.black,
                               ),
                             ),
                           ),
@@ -219,6 +235,22 @@ class _LoginScreenState extends State<LoginScreen> {
   // Nueva función para el inicio de sesión con Facebook
   Future<void> signInWithFacebook() async {
     try {
+      // Verifica si ya hay una sesión activa
+      //if (FirebaseAuth.instance.currentUser != null) {
+      // Usuario ya autenticado, obtén el correo electrónico
+      //String email = FirebaseAuth.instance.currentUser!.email!;
+
+      // Puedes hacer algo con el correo electrónico, por ejemplo, imprimirlo
+      //print('Correo electrónico del usuario: $email');
+
+      // Aquí puedes realizar otras acciones según tu lógica
+      // ...
+
+      // Redirige a la pantalla de inicio
+      Navigator.pushReplacementNamed(context, '/inicio');
+
+      //}
+
       // Realiza la autenticación con Facebook
       final LoginResult loginResult = await FacebookAuth.instance.login();
 
@@ -454,12 +486,21 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Restablecer contraseña'),
+          title: Text(
+            'Restablecer contraseña',
+            style: GoogleFonts.actor(
+                color:
+                    GlobalValues.flagTheme.value ? Colors.white : Colors.black),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 'Ingresa tu dirección de correo electrónico para restablecer la contraseña:',
+                style: GoogleFonts.actor(
+                    color: GlobalValues.flagTheme.value
+                        ? Colors.white
+                        : Colors.black),
               ),
               const SizedBox(height: 10),
               _buildTextField(
@@ -474,9 +515,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Cerrar el cuadro de diálogo
                 Navigator.pop(context);
               },
-              child: const Text(
+              child: Text(
                 'Cancelar',
-                style: TextStyle(color: Colors.black),
+                style: GoogleFonts.adventPro(
+                    color: GlobalValues.flagTheme.value
+                        ? Colors.white
+                        : Colors.black),
               ),
             ),
             TextButton(
@@ -486,9 +530,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Cerrar el cuadro de diálogo
                 Navigator.pop(context);
               },
-              child: const Text(
+              child: Text(
                 'Enviar',
-                style: TextStyle(color: Colors.black),
+                style: GoogleFonts.adventPro(
+                    color: GlobalValues.flagTheme.value
+                        ? Colors.white
+                        : Colors.black),
               ),
             ),
           ],
